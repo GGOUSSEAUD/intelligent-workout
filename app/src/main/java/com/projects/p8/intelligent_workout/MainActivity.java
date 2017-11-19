@@ -9,7 +9,8 @@ public class MainActivity extends Activity
     private IntelligentWorkout mIntelligentWorkout;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);

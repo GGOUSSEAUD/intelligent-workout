@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-	<com.projects.p8.IntelligentWorkout android:id="@+id/IntelligentWorkout"
+	<com.projects.p8.intelligent_workout.IntelligentWorkout android:id="@+id/IntelligentWorkout"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent" />
 
