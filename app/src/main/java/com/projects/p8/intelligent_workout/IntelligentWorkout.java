@@ -33,8 +33,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     static final int    CST_blueblock   = 1;
     static final int    CST_greenblock     = 2;
 
-    static final int carteHeight = 5;
-    static final int carteWidth = 5;
+    // ancres pour pouvoir centrer la carte du jeu
+    int        carteTopAnchor;                   // coordonnées en Y du point d'ancrage de notre carte
+    int        carteLeftAnchor;                  // coordonnées en X du point d'ancrage de notre carte
+
+    // taille de la carte
+    static final int    carteWidth    = 5;
+    static final int    carteHeight   = 5;
+    static final int    carteTileSize = 10;
 
     // tableau de reference du terrain
     int [][] ref    = {
@@ -46,6 +52,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     };
 
     SurfaceHolder holder;
+
     Paint paint;
 
     public IntelligentWorkout(Context context, AttributeSet attrs)
@@ -64,7 +71,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         greenblock 		= BitmapFactory.decodeResource(mRes, R.drawable.greenblock);
 
         // initialisation des parmametres du jeu
-        //initparameters();
+        initparameters();
 
         // prise de focus pour gestion des touches
         setFocusable(true);
@@ -115,6 +122,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         paint.setStrokeWidth(3);
         paint.setTextAlign(Paint.Align.LEFT);
         carte           = new int[carteHeight][carteWidth];
+        carteTopAnchor  = (getHeight()- carteHeight*carteTileSize)/2;
+        carteLeftAnchor = (getWidth()- carteWidth*carteTileSize)/2;
     }
 
     // dessin de la carte du jeu
@@ -127,13 +136,13 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 switch (carte[i][j])
                 {
                     case CST_redblock:
-                        canvas.drawBitmap(redblock, j, i, null);
+                        canvas.drawBitmap(redblock, carteLeftAnchor+ j*carteTileSize, carteTopAnchor+ i*carteTileSize, null);
                         break;
                     case CST_blueblock:
-                        canvas.drawBitmap(blueblock, j, i, null);
+                        canvas.drawBitmap(blueblock, carteLeftAnchor+ j*carteTileSize, carteTopAnchor+ i*carteTileSize, null);
                         break;
                     case CST_greenblock:
-                        canvas.drawBitmap(greenblock, j, i, null);
+                        canvas.drawBitmap(greenblock, carteLeftAnchor+ j*carteTileSize, carteTopAnchor+ i*carteTileSize, null);
                         break;
                 }
             }
