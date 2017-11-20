@@ -29,9 +29,9 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
 
 
     // constante modelisant les differentes types de cases
-    static final int    CST_redblock     = 0;
+    static final int    CST_redblock    = 0;
     static final int    CST_blueblock   = 1;
-    static final int    CST_greenblock     = 2;
+    static final int    CST_greenblock  = 2;
 
     // ancres pour pouvoir centrer la carte du jeu
     int        carteTopAnchor;                   // coordonnées en Y du point d'ancrage de notre carte
@@ -51,6 +51,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
     };
 
+    private     boolean in = true;
+    private     Thread  cv_thread;
     SurfaceHolder holder;
 
     Paint paint;
@@ -73,6 +75,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         // initialisation des parmametres du jeu
         initparameters();
 
+        cv_thread   = new Thread(this);
         // prise de focus pour gestion des touches
         setFocusable(true);
     }
@@ -124,6 +127,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         carte           = new int[carteHeight][carteWidth];
         carteTopAnchor  = (getHeight()- carteHeight*carteTileSize)/2;
         carteLeftAnchor = (getWidth()- carteWidth*carteTileSize)/2;
+        loadlevel(0);
+
+        if ((cv_thread!=null) && (!cv_thread.isAlive())) {
+            cv_thread.start();
+            Log.e("-FCT-", "cv_thread.start()");
+        }
     }
 
     // dessin de la carte du jeu
@@ -182,10 +191,11 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     public void run()
     {
         Canvas c = null;
-        while (true)
+        while (in)
         {
             try
             {
+                cv_thread.sleep(40);
                 try
                 {
                     c = holder.lockCanvas(null);
