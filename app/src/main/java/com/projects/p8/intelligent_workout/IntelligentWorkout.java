@@ -40,11 +40,27 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     int        carteTopAnchor;                   // coordonnées en Y du point d'ancrage de notre carte
     int        carteLeftAnchor;                  // coordonnées en X du point d'ancrage de notre carte
 
+    static double screenX;
+    static double screenY;
+
     // taille de la carte
     static final int    carteWidth    = 5;
     static final int    carteHeight   = 5;
-    static int    carteTileWidth = 0;
-    static int    carteTileHeight = 0;
+    static int          carteTileWidth = 0;
+    static int          carteTileHeight = 0;
+
+    // indice courant du touchEvent
+    static int iX = -1;
+    static int iY = -1;
+    boolean lock_row;
+    boolean lock_rowx;
+    boolean lock_rowy;
+
+    // valeur courante du touchEvent
+    static double touchX;
+    static double touchY;
+    static double touchDebutX;
+    static double touchDebutY;
 
     // tableau de reference du terrain
     int [][] ref    = {
@@ -113,6 +129,9 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     // initialisation du jeu
     public void initparameters()
     {
+        screenX = getWidth();
+        screenY = getHeight();
+
         carteTopAnchor = getHeight() / 3;
         carteLeftAnchor = 0; // (getWidth()- carteWidth*carteTileSize)/2;
         carteTileHeight = (getHeight()-carteTopAnchor) / 5 ;
@@ -168,6 +187,139 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
     }
 
+    private void decaleCarte (int ind, int num)
+    {
+        int tmp, i, j;
+        switch (num)
+        {
+            case 1:
+                //decale a droite
+                tmp = carte[ind][carteWidth-1];
+                for (j = carteWidth-1; j > 0; --j)
+                {
+                    carte[ind][j] = carte[ind][j-1];
+                }
+                carte[ind][0] = tmp;
+                break;
+            case 2:
+                //decale a gauche
+                tmp = carte[ind][0];
+                for (j = 0; j < carteWidth; ++j)
+                {
+                    carte[ind][j] = carte[ind][j+1];
+                }
+                carte[ind][carteWidth-1] = tmp;
+                break;
+            case 3:
+                //decale en haut
+                tmp = carte[0][ind];
+                for (i = 0; i < carteHeight; ++i)
+                {
+                    carte[i][ind] = carte[i+1][ind];
+                }
+                carte[carteHeight-1][ind] = tmp;
+                break;
+            case 4:
+                //decale en bas
+                tmp = carte[carteHeight-1][ind];
+                for (i = carteHeight-1; i > 0; --i)
+                {
+                    carte[i][ind] = carte[i-1][ind];
+                }
+                carte[0][ind] = tmp;
+                break;
+        }
+    }
+
+    // dessin de la carte du jeu
+    private void updatexpaintcarte(Canvas canvas)
+    {
+        for (int i=0; i< carteHeight; i++)
+        {
+            for (int j=0; j< carteWidth; j++)
+            {
+                if(i == iX)
+                {
+                    switch (carte[i][j])
+                    {
+                        case CST_redblock:
+                            canvas.drawBitmap(redblock, carteLeftAnchor + j * carteTileWidth + (int)touchX, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                        case CST_blueblock:
+                            int val = IsOut(carteLeftAnchor+ j*carteTileWidth + (int)touchX, 0);
+                            if(val == 0) //n'est pas out
+                                canvas.drawBitmap(blueblock, carteLeftAnchor+ j*carteTileWidth + (int)touchX, carteTopAnchor+ i*carteTileHeight, null);
+                            else if (val == 1) //out a droite
+                            {
+                                canvas.drawBitmap(blueblock, carteLeftAnchor + (int)touchX, carteTopAnchor + i * carteTileHeight, null);
+                            }
+                            else if (val == 2)//out a gauche
+                                canvas.drawBitmap(blueblock, carteWidth*carteTileWidth + (int)touchX, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                        case CST_greenblock:
+                            canvas.drawBitmap(greenblock, carteLeftAnchor+ j*carteTileWidth + (int)touchX, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (carte[i][j])
+                    {
+                        case CST_redblock:
+                            canvas.drawBitmap(redblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                        case CST_blueblock:
+                            canvas.drawBitmap(blueblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                        case CST_greenblock:
+                            canvas.drawBitmap(greenblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateypaintcarte(Canvas canvas)
+    {
+        for (int i=0; i< carteHeight; i++)
+        {
+            for (int j=0; j< carteWidth; j++)
+            {
+                if (j == iY)
+                {
+                    switch (carte[i][j])
+                    {
+                        case CST_redblock:
+                            canvas.drawBitmap(redblock, carteLeftAnchor + j * carteTileWidth, carteTopAnchor+ i*carteTileHeight + (int)touchY, null);
+                            break;
+                        case CST_blueblock:
+                            canvas.drawBitmap(blueblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight + (int)touchY, null);
+                            break;
+                        case CST_greenblock:
+                            canvas.drawBitmap(greenblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight + (int)touchY, null);
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (carte[i][j])
+                    {
+                        case CST_redblock:
+                            canvas.drawBitmap(redblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                        case CST_blueblock:
+                            canvas.drawBitmap(blueblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                        case CST_greenblock:
+                            canvas.drawBitmap(greenblock, carteLeftAnchor+ j*carteTileWidth, carteTopAnchor+ i*carteTileHeight, null);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     // permet d'identifier si la partie est gagnee (tous les diamants à leur place)
     private boolean isWon()
     {
@@ -177,8 +329,43 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     // dessin du jeu (fond uni, en fonction du jeu gagne ou pas dessin du plateau)
     private void nDraw(Canvas canvas)
     {
-        canvas.drawRGB(44,44,44);
-        paintcarte(canvas);
+        if(lock_row)
+        {
+            canvas.drawRGB(44,44,44);
+
+            if(lock_rowx)
+            {
+                if(Math.abs(touchX) > carteTileWidth && touchX > 0)
+                {
+                    decaleCarte(iX, 1);
+                    touchDebutX = touchDebutX + touchX;
+                }
+                else if(Math.abs(touchX) > carteTileWidth && touchX < 0)
+                {
+                    decaleCarte(iX, 2);
+                    touchDebutX = touchDebutX - touchX;
+                }
+            }
+            else if(lock_rowy)
+            {
+                if(Math.abs(touchY) > carteTileHeight && touchY < 0)
+                {
+                    decaleCarte(iY, 3);
+                    touchDebutY = touchDebutY + touchY;
+                }
+                else if(Math.abs(touchY) > carteTileHeight && touchY > 0)
+                {
+                    decaleCarte(iY, 4);
+                    touchDebutY = touchDebutY + touchY;
+                }
+            }
+            paintcarte(canvas);
+        }
+        else
+        {
+            canvas.drawRGB(44,44,44);
+            paintcarte(canvas);
+        }
     }
 
     // callback sur le cycle de vie de la surfaceview
@@ -228,29 +415,33 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
     }
 
-    // verification que nous sommes dans le tableau
-    private boolean IsOut(int x, int y)
+    private int IsOut(int val, int num)
     {
-        if ((x < 0) || (x > carteWidth- 1))
+        // num :    0 check on width
+        //          1 check on height
+
+        if (num == 0)
         {
-            return true;
+            if(val > carteWidth * carteTileWidth)
+                return 1;
+            if(val < carteLeftAnchor)
+                return 2;
         }
-        if ((y < 0) || (y > carteHeight- 1))
+        if (num == 1)
         {
-            return true;
+            if(val > carteHeight * carteTileHeight)
+                return 3;
+            if(val < 0)
+                return 4;
         }
-        return false;
+        return 0;
     }
 
-    //controle de la valeur d'une cellule
-    private boolean IsCell(int x, int y, int mask)
+    private void modifyCarte ()
     {
-        if (carte[y][x] == mask)
-        {
-            return true;
-        }
-        return false;
+
     }
+
 
     // fonction permettant de recuperer les retours clavier
     @Override
@@ -282,25 +473,63 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         return true;
     }
 
-    public String indice (double x, double y)
+    public Tuple indice (double x, double y)
     {
         int i, j;
         int xi = -1, yj = -1;
         for (i = 0; i < x; i += carteTileWidth) { xi++; }
         for (j = carteTopAnchor; j < y; j += carteTileHeight) { yj++; }
-
-        return "[" + yj + "," + xi + "]";
+        Tuple o = new Tuple(yj, xi);
+        return o;
     }
 
     // fonction permettant de recuperer les evenements tactiles
     public boolean onTouchEvent (MotionEvent event)
     {
-        Log.i("-> FCT <-", "onTouchEvent: X"+ event.getX());
-        Log.i("-> FCT <-", "onTouchEvent: Y"+ event.getY());
-        if (event.getY() > carteTopAnchor)
-            Log.i("-> FCT <-", "Indice: "+ indice(event.getX(), event.getY()));
+        double x = event.getX();
+        double y = event.getY();
 
+        //Log.i("-> FCT <-", "onTouchEvent: X"+ x);
+        //Log.i("-> FCT <-", "onTouchEvent: Y"+ y);
 
-        return super.onTouchEvent(event);
+        switch (event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+                Log.i("TAG", "touched down");
+                // Touch on main board screen
+                if (event.getY() > carteTopAnchor)
+                {
+                    Tuple tuple = indice(x, y);
+                    iX = tuple.getIx();
+                    iY = tuple.getIy();
+                    touchDebutX = x;
+                    touchDebutY = y;
+                    lock_row = true;
+                    Log.i("-> FCT <-", "indice: [" + iX + "," + iY + "]");
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                touchX = x - touchDebutX;
+                touchY = y - touchDebutY;
+                Log.i("-> FCT <-", "val[x, y] = [" + touchX + "," + touchY + "]");
+                if(Math.abs(touchX) > Math.abs(touchY))
+                {
+                    lock_rowx = true;
+                    lock_rowy = false;
+                }
+                else
+                {
+                    lock_rowy = true;
+                    lock_rowx = false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                lock_row = false;
+                lock_rowx = false;
+                lock_rowy = false;
+                Log.i("TAG", "touched up");
+                break;
+        }
+        return true;
     }
 }
