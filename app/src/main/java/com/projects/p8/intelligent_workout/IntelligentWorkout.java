@@ -407,31 +407,25 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
 
     public void run()
     {
-        Canvas c = null;
-        while (in)
-        {
-            try
-            {
-                cv_thread.sleep(40);
-                try
-                {
-                    c = holder.lockCanvas(null);
-                    if(c != null)
-                        nDraw(c);
-                }
-                finally
-                {
-                    if (c != null)
-                    {
-                        holder.unlockCanvasAndPost(c);
+            while( !cv_thread.interrupted() ) {
+                Canvas c = null;
+                while (in) {
+                    try {
+                        cv_thread.sleep(40);
+                        try {
+                            c = holder.lockCanvas(null);
+                            if (c != null)
+                                nDraw(c);
+                        } finally {
+                            if (c != null) {
+                                holder.unlockCanvasAndPost(c);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e("-> RUN <-", e.getMessage());
                     }
                 }
             }
-            catch(Exception e)
-            {
-                Log.e("-> RUN <-", e.getMessage());
-            }
-        }
     }
 
     // fonction permettant de recuperer les retours clavier
@@ -482,6 +476,11 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
 
         //Log.i("-> FCT <-", "onTouchEvent: X"+ x);
         //Log.i("-> FCT <-", "onTouchEvent: Y"+ y);
+        if(x > cartePrevLeftAnchor/5 && x < cartePrevLeftAnchor/5 + cartePrevLeftAnchor/2
+                && y > cartePrevTopAnchor && y < cartePrevTopAnchor + (int) (cartePrevTileHeight*1.5))
+        {
+            in = false;
+        }
 
         switch (event.getAction())
         {
