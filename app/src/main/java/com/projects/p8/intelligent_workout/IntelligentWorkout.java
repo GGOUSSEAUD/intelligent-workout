@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -28,8 +27,23 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private Bitmap      redblockprev;
     private Bitmap 		blueblockprev;
     private Bitmap 		greenblockprev;
-    private Bitmap 		tmenu;
-    private Bitmap 		menu;
+    private Bitmap      tmenui;
+    private Bitmap      menui;
+    private Bitmap      tmenum;
+    private Bitmap      menum;
+    private Bitmap      imtplay;
+    private Bitmap      implay;
+    private Bitmap      imtplaypressed;
+    private Bitmap      implaypressed;
+    private Bitmap      imtsettings;
+    private Bitmap      imsettings;
+    private Bitmap      imtsettingspressed;
+    private Bitmap      imsettingspressed;
+    private Bitmap      tlock;
+    private Bitmap      lock;
+    private Bitmap      tsucces;
+    private Bitmap      succes;
+
 
     // Declaration des objets Ressources et Context permettant d'accéder aux ressources de notre application et de les charger
     private Resources 	mRes;
@@ -39,17 +53,27 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     int[][] carte;
     int[][] carteprev;
 
+    //tableau pour les niveaux succes
+    int [] leveldone;
+
+    int nblevel = 3;
     int lvl = 0;
     // constante modelisant les differentes types de cases
     static final int    CST_redblock    = 0;
     static final int    CST_blueblock   = 1;
     static final int    CST_greenblock  = 2;
+    static final int    CST_RIGHT    = 1;
+    static final int    CST_LEFT   = 2;
+    static final int    CST_UP  = 3;
+    static final int    CST_DOWN  = 4;
 
     // ancres pour pouvoir centrer la carte du jeu
     int        carteTopAnchor;                   // coordonnées en Y du point d'ancrage de notre carte
     int        carteLeftAnchor;                  // coordonnées en X du point d'ancrage de notre carte
     int        cartePrevTopAnchor;
     int        cartePrevLeftAnchor;
+    int        leftLevelAnchor;
+    int        topLevelAnchor;
 
 
     static double screenX;
@@ -62,13 +86,18 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     static int          carteTileHeight = 0;
     static int          cartePrevTileWidth = 0;
     static int          cartePrevTileHeight = 0;
+    static int          lockTileWidth = 0;
+    static int          lockTileHeight = 0;
 
-    // indice courant du touchEvent
+    // indice_carte courant du touchEvent
     static int iX = -1;
     static int iY = -1;
     boolean lock_row;
     boolean lock_rowx;
     boolean lock_rowy;
+    boolean bmenu;
+    boolean bmenulevel;
+    boolean bplaypressed;
 
     // valeur courante du touchEvent
     static double touchX;
@@ -109,6 +138,22 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
     };
 
+    int [][] ref3    = {
+            {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+            {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock},
+            {CST_redblock, CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock}
+    };
+
+    int [][] refprev3    = {
+            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+            {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
+            {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
+            {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
+            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
+    };
+
     private     boolean in = true;
     private     Thread  cv_thread;
     SurfaceHolder holder;
@@ -144,26 +189,35 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 {
                     for (int j=0; j< carteWidth; j++)
                     {
-                        carte[j][i]= ref[j][i];
-                        carteprev[j][i]= refprev[j][i];
+                        carte[i][j]= ref[i][j];
+                        carteprev[i][j]= refprev[i][j];
                     }
                 }
                 break;
             }
             case 1:
             {
+
                 for (int i=0; i< carteHeight; i++)
                 {
                     for (int j=0; j< carteWidth; j++)
                     {
-                        carte[j][i]= ref2[j][i];
-                        carteprev[j][i]= refprev2[j][i];
+                        carte[i][j]= ref2[i][j];
+                        carteprev[i][j]= refprev2[i][j];
                     }
                 }
                 break;
             }
             case 2:
             {
+                for (int i=0; i< carteHeight; i++)
+                {
+                    for (int j=0; j< carteWidth; j++)
+                    {
+                        carte[i][j]= ref3[i][j];
+                        carteprev[i][j]= refprev3[i][j];
+                    }
+                }
                 break;
             }
             default:
@@ -183,6 +237,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         carteLeftAnchor = 0;
         carteTileHeight = (getHeight()-carteTopAnchor) / 5 ;
         carteTileWidth  = getWidth() / 5;
+
+        leftLevelAnchor = (int) screenX/20;
+        topLevelAnchor = (int) screenY/20;
+
+        lockTileWidth = (int)(screenX - 5* leftLevelAnchor)/4;
+        lockTileHeight = (int)(screenY - 6* topLevelAnchor)/5;
 
         cartePrevTopAnchor = (int) screenY/20;
         cartePrevLeftAnchor = (int) screenX/4;
@@ -205,8 +265,23 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         blueblockprev 	= Bitmap.createScaledBitmap(tblueblockprev, cartePrevTileWidth, cartePrevTileHeight, true);
         greenblockprev 	= Bitmap.createScaledBitmap(tgreenblockprev, cartePrevTileWidth, cartePrevTileHeight, true);
 
-        tmenu   = BitmapFactory.decodeResource(mRes, R.drawable.menu);
-        menu    = Bitmap.createScaledBitmap(tmenu, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenui      = BitmapFactory.decodeResource(mRes, R.drawable.menui);
+        menui       = Bitmap.createScaledBitmap(tmenui, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenum      = BitmapFactory.decodeResource(mRes, R.drawable.menum);
+        menum       = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
+
+        imtplay         = BitmapFactory.decodeResource(mRes, R.drawable.play);
+        imtplaypressed  = BitmapFactory.decodeResource(mRes, R.drawable.playpressed);
+        imtsettings  = BitmapFactory.decodeResource(mRes, R.drawable.settings);
+        imtsettingspressed  = BitmapFactory.decodeResource(mRes, R.drawable.settingspressed);
+        tlock         = BitmapFactory.decodeResource(mRes, R.drawable.lock);
+        tsucces         = BitmapFactory.decodeResource(mRes, R.drawable.succes);
+        implay          = Bitmap.createScaledBitmap(imtplay, carteTileWidth, carteTileHeight, true);
+        implaypressed   = Bitmap.createScaledBitmap(imtplaypressed, carteTileWidth, carteTileHeight, true);
+        imsettings   = Bitmap.createScaledBitmap(imtsettings, carteTileWidth, carteTileHeight, true);
+        imsettingspressed   = Bitmap.createScaledBitmap(imtsettingspressed, carteTileWidth, carteTileHeight, true);
+        lock   = Bitmap.createScaledBitmap(tlock, lockTileWidth, lockTileHeight, true);
+        succes   = Bitmap.createScaledBitmap(tsucces, lockTileWidth, lockTileHeight, true);
 
         paint = new Paint();
         paint.setColor(0xff0000);
@@ -220,7 +295,19 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         paint.setTextAlign(Paint.Align.LEFT);
         carte           = new int[carteHeight][carteWidth];
         carteprev       = new int[carteHeight][carteWidth];
+        leveldone       = new int[nblevel];
+
+        for (int i = 0; i < nblevel; i++) leveldone[i] = 0;
+
         loadlevel(lvl);
+
+        lock_rowy = false;
+        lock_rowx = false;
+        lock_row = false;
+        bmenu = true; //init au bmenu
+        bmenulevel = false; //menu lvl
+
+        bplaypressed = false; //appuye sur bouton play
 
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
@@ -273,9 +360,43 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
     }
 
-    private void paintmenu(Canvas canvas)
+    private void paintmenui(Canvas canvas)
     {
-        canvas.drawBitmap(menu, cartePrevLeftAnchor/5, cartePrevTopAnchor, null);
+        canvas.drawBitmap(menui, cartePrevLeftAnchor/5, cartePrevTopAnchor, null);
+    }
+
+    private void paintmenum(Canvas canvas)
+    {
+        canvas.drawBitmap(menum, 0, 0, null);
+        if(!lock_rowx)
+            canvas.drawBitmap(implay, (int)(screenX/4), (int)(screenY - screenY/carteHeight), null);
+        else
+            canvas.drawBitmap(implaypressed, (int)(screenX/4), (int)(screenY - screenY/carteHeight), null);
+        if(!lock_rowy)
+            canvas.drawBitmap(imsettings, (int)(screenX - carteTileWidth - screenX/4), (int)(screenY - screenY/carteHeight), null);
+        else
+            canvas.drawBitmap(imsettingspressed, (int)(screenX - carteTileWidth - screenX/4), (int)(screenY - screenY/carteHeight), null);
+    }
+
+    private void paintlvl(Canvas canvas)
+    {
+        int nbimagedraw = 0;
+        int j = 0;
+        canvas.drawBitmap(menum, 0, 0, null);
+
+        //affiche jusqu'à 20 niveaux par page
+        while (nbimagedraw < nblevel) {
+            for (int i = 0; i < 4; i++) {
+                if (leveldone[nbimagedraw] == 0)
+                    canvas.drawBitmap(lock, leftLevelAnchor + i * lockTileWidth + i * leftLevelAnchor, j * lockTileHeight + topLevelAnchor + j*topLevelAnchor, null);
+                else
+                    canvas.drawBitmap(succes, leftLevelAnchor + i * lockTileWidth + i * leftLevelAnchor, j * lockTileHeight + topLevelAnchor + j*topLevelAnchor, null);
+                nbimagedraw++;
+                if(nbimagedraw == nblevel)
+                    break;
+            }
+            j++;
+        }
     }
 
     private void decaleCarte (int ind, int num)
@@ -283,7 +404,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         int tmp, i, j;
         switch (num)
         {
-            case 1:
+            case CST_RIGHT:
                 //decale a droite
                 tmp = carte[ind][carteWidth-1];
                 for (j = carteWidth-1; j > 0; --j)
@@ -292,7 +413,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 }
                 carte[ind][0] = tmp;
                 break;
-            case 2:
+            case CST_LEFT:
                 //decale a gauche
                 tmp = carte[ind][0];
                 for (j = 0; j < carteWidth-1; ++j)
@@ -301,7 +422,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 }
                 carte[ind][carteWidth-1] = tmp;
                 break;
-            case 3:
+            case CST_UP:
                 //decale en haut
                 tmp = carte[0][ind];
                 for (i = 0; i < carteHeight-1; ++i)
@@ -310,7 +431,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 }
                 carte[carteHeight-1][ind] = tmp;
                 break;
-            case 4:
+            case CST_DOWN:
                 //decale en bas
                 tmp = carte[carteHeight-1][ind];
                 for (i = carteHeight-1; i > 0; --i)
@@ -325,65 +446,78 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     // permet d'identifier si la partie est gagnee (tous les diamants à leur place)
     private boolean isWon()
     {
-        for (int i=0; i< carteHeight; i++)
+        for (int i=0; i < carteHeight; i++)
         {
-            for (int j=0; j< carteWidth; j++)
+            for (int j=0; j < carteWidth; j++)
             {
-                if (carte[j][i] != refprev[j][i])
+                if (carte[i][j] != carteprev[i][j])
+                {
+                    Log.e("-FCT-", "pas win lvl=" + lvl + " : carte["+ i + "][" +j+"] =" + carte[i][j] + ", carteprev["+ i + "][" +j+"] = " + refprev[i][j]);
                     return false;
+                }
             }
         }
+        leveldone[lvl] = 1;
         return true;
     }
 
     // dessin du jeu (fond uni, en fonction du jeu gagne ou pas dessin du plateau)
     private void nDraw(Canvas canvas)
     {
-        if(isWon())
+        canvas.drawRGB(44,44,44);
+        if(bmenu)
         {
-            lvl++;
-            loadlevel(lvl);
+            paintmenum(canvas);
         }
-        if(lock_row)
+        else if(bmenulevel)
         {
-            canvas.drawRGB(44,44,44);
-
-            if(lock_rowx)
-            {
-                if(Math.abs(touchX) > carteTileWidth/2 && touchX > 0)
-                {
-                    decaleCarte(iX, 1);
-                    touchDebutX = touchDebutX + touchX;
-                }
-                else if(Math.abs(touchX) > carteTileWidth/2 && touchX < 0)
-                {
-                    decaleCarte(iX, 2);
-                    touchDebutX = touchDebutX + touchX;
-                }
-            }
-            else if(lock_rowy)
-            {
-                if(Math.abs(touchY) > carteTileHeight/2 && touchY < 0)
-                {
-                    decaleCarte(iY, 3);
-                    touchDebutY = touchDebutY + touchY;
-                }
-                else if(Math.abs(touchY) > carteTileHeight/2 && touchY > 0)
-                {
-                    decaleCarte(iY, 4);
-                    touchDebutY = touchDebutY + touchY;
-                }
-            }
-            paintcarte(canvas);
-            paintpreview(canvas);
-            paintmenu(canvas);
+            paintlvl(canvas);
         }
         else
         {
-            canvas.drawRGB(44,44,44);
-            paintcarte(canvas);
-            paintpreview(canvas);
-            paintmenu(canvas);
+            if(isWon())
+            {
+                lvl++;
+                bmenulevel = true;
+            }
+            if(lock_row)
+            {
+                if(lock_rowx)
+                {
+                    if(Math.abs(touchX) > carteTileWidth/2 && touchX > 0)
+                    {
+                        decaleCarte(iX, CST_RIGHT);
+                        touchDebutX = touchDebutX + touchX;
+                    }
+                    else if(Math.abs(touchX) > carteTileWidth/2 && touchX < 0)
+                    {
+                        decaleCarte(iX, CST_LEFT);
+                        touchDebutX = touchDebutX + touchX;
+                    }
+                }
+                else if(lock_rowy)
+                {
+                    if(Math.abs(touchY) > carteTileHeight/2 && touchY < 0)
+                    {
+                        decaleCarte(iY, CST_UP);
+                        touchDebutY = touchDebutY + touchY;
+                    }
+                    else if(Math.abs(touchY) > carteTileHeight/2 && touchY > 0)
+                    {
+                        decaleCarte(iY, CST_DOWN);
+                        touchDebutY = touchDebutY + touchY;
+                    }
+                }
+                paintcarte(canvas);
+                paintpreview(canvas);
+                paintmenui(canvas);
+            }
+            else
+            {
+                paintcarte(canvas);
+                paintpreview(canvas);
+                paintmenui(canvas);
+            }
         }
     }
 
@@ -428,37 +562,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             }
     }
 
-    // fonction permettant de recuperer les retours clavier
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-
-        Log.i("-> FCT <-", "onKeyUp: "+ keyCode);
-
-        if (keyCode == KeyEvent.KEYCODE_0)
-        {
-            initparameters();
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_UP)
-        {
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN)
-        {
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT)
-        {
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
-        {
-        }
-        return true;
-    }
-
-    public Tuple indice (double x, double y)
+    public Tuple indice_carte(double x, double y)
     {
         int i, j;
         int xi = -1, yj = -1;
@@ -468,58 +572,131 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         return o;
     }
 
+    public int indice_lvl(double x, double y)
+    {
+        int i;
+        int nb = -1;
+        for (i = 0; i < y; i += topLevelAnchor + lockTileHeight) { nb++; }
+        nb *= 4;
+        for (i = 0; i < x; i += leftLevelAnchor + lockTileWidth) { nb++; }
+        return nb-1;
+    }
+
     // fonction permettant de recuperer les evenements tactiles
     public boolean onTouchEvent (MotionEvent event)
     {
         double x = event.getX();
         double y = event.getY();
 
-        //Log.i("-> FCT <-", "onTouchEvent: X"+ x);
-        //Log.i("-> FCT <-", "onTouchEvent: Y"+ y);
-        if(x > cartePrevLeftAnchor/5 && x < cartePrevLeftAnchor/5 + cartePrevLeftAnchor/2
-                && y > cartePrevTopAnchor && y < cartePrevTopAnchor + (int) (cartePrevTileHeight*1.5))
+        if(bmenu) //while menu
         {
-            in = false;
-        }
+            switch (event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    //touch sur play
+                    if(x > (screenX/4) && x < (screenX/4 + carteTileWidth)
+                            && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
+                        lock_rowx = true;
+                    //touch sur settings
+                    if(x > (screenX - carteTileWidth - screenX/4) && x < (screenX - screenX/4)
+                            && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
+                        lock_rowy = true;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    //out of play
+                    if(x < (screenX/4) || x > (screenX/4 + carteTileWidth)
+                            || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight) {
+                        lock_rowx = false;
+                    }
+                    //out of settings
+                    if(x < (screenX - carteTileWidth - screenX/4) || x > (screenX - screenX/4)
+                            || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight)
+                        lock_rowy = false;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    //touch sur play
+                    if (lock_rowx)
+                    {
+                        bmenu = false;
+                        lock_rowx = false;
+                        bmenulevel = true;
+                    }
+                    //touch sur settings
+                    if (lock_rowy)
+                    {
+                        initparameters();//reset lvl
+                        lock_rowy = false;
+                    }
 
-        switch (event.getAction())
+                    break;
+            }
+        }
+        else if(bmenulevel)
         {
-            case MotionEvent.ACTION_DOWN:
-                Log.i("TAG", "touched down");
-                // Touch on main board screen
-                if (event.getY() > carteTopAnchor)
-                {
-                    Tuple tuple = indice(x, y);
-                    iX = tuple.getIx();
-                    iY = tuple.getIy();
-                    touchDebutX = x;
-                    touchDebutY = y;
-                    lock_row = true;
-                    Log.i("-> FCT <-", "indice: [" + iX + "," + iY + "]");
-                }
-                break;
-            case MotionEvent.ACTION_MOVE:
-                touchX = x - touchDebutX;
-                touchY = y - touchDebutY;
-                Log.i("-> FCT <-", "val[x, y] = [" + touchX + "," + touchY + "]");
-                if(Math.abs(touchX) > Math.abs(touchY))
-                {
-                    lock_rowx = true;
-                    lock_rowy = false;
-                }
-                else
-                {
-                    lock_rowy = true;
+            switch (event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
+                case MotionEvent.ACTION_UP:
+                    //Log.i("TAG", "" + indice_lvl(x, y));
+                    lvl = indice_lvl(x, y);
+                    if (lvl < nblevel) {
+                        bmenulevel = false;
+                        loadlevel(lvl);
+                    }
+                    break;
+            }
+        }
+        else //while in level
+        {
+            if(x > cartePrevLeftAnchor/5 && x < cartePrevLeftAnchor/5 + cartePrevLeftAnchor/2
+                    && y > cartePrevTopAnchor && y < cartePrevTopAnchor + (int) (cartePrevTileHeight*1.5))
+            {
+                bmenu = true;
+            }
+
+            switch (event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    Log.i("TAG", "touched down");
+                    // Touch on main board screen
+                    if (event.getY() > carteTopAnchor)
+                    {
+                        Tuple tuple = indice_carte(x, y);
+                        iX = tuple.getIx();
+                        iY = tuple.getIy();
+                        touchDebutX = x;
+                        touchDebutY = y;
+                        lock_row = true;
+                        Log.i("-> FCT <-", "indice_carte: [" + iX + "," + iY + "]");
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    touchX = x - touchDebutX;
+                    touchY = y - touchDebutY;
+                    Log.i("-> FCT <-", "val[x, y] = [" + touchX + "," + touchY + "]");
+                    if(Math.abs(touchX) > Math.abs(touchY))
+                    {
+                        lock_rowx = true;
+                        lock_rowy = false;
+                    }
+                    else
+                    {
+                        lock_rowy = true;
+                        lock_rowx = false;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    lock_row = false;
                     lock_rowx = false;
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                lock_row = false;
-                lock_rowx = false;
-                lock_rowy = false;
-                Log.i("TAG", "touched up");
-                break;
+                    lock_rowy = false;
+                    Log.i("TAG", "touched up");
+                    break;
+            }
         }
         return true;
     }
+    //((AppCompatActivity) getContext()).finish(); // end activity
 }
