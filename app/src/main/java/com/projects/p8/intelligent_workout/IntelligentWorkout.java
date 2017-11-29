@@ -14,6 +14,8 @@ import android.view.SurfaceView;
 
 public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
+    private IntelligentWorkout.IMyEventListener mEventListener;
+
     // Declaration des images
     private Bitmap      tredblock;
     private Bitmap 		tblueblock;
@@ -31,14 +33,6 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private Bitmap      menui;
     private Bitmap      tmenum;
     private Bitmap      menum;
-    private Bitmap      imtplay;
-    private Bitmap      implay;
-    private Bitmap      imtplaypressed;
-    private Bitmap      implaypressed;
-    private Bitmap      imtsettings;
-    private Bitmap      imsettings;
-    private Bitmap      imtsettingspressed;
-    private Bitmap      imsettingspressed;
     private Bitmap      tlock;
     private Bitmap      lock;
     private Bitmap      tsucces;
@@ -53,7 +47,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     int[][] carte;
     int[][] carteprev;
 
-    //tableau pour les niveaux succes
+    //tableau pour les niveaux success
     int [] leveldone;
 
     int nblevel = 3;
@@ -74,7 +68,6 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     int        cartePrevLeftAnchor;
     int        leftLevelAnchor;
     int        topLevelAnchor;
-
 
     static double screenX;
     static double screenY;
@@ -106,52 +99,53 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     static double touchDebutY;
 
     // tableau de reference du terrain
-    int [][] ref    = {
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
-            {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock}
+    int [][][] ref    = {
+            {       //Level 0
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock}
+            },
+            {       //Level 1
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
+            },
+            {       //Level 2
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock}
+            }
     };
 
-    int [][] refprev    = {
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
-            {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock}
-    };
-
-    int [][] ref2    = {
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
-    };
-
-    int [][] refprev2    = {
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
-    };
-
-    int [][] ref3    = {
-            {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock},
-            {CST_redblock, CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock}
-    };
-
-    int [][] refprev3    = {
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
-            {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
-            {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
+    int [][][] refprev    = {
+            {
+                    //Level 0
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock}
+            },
+            {       //Level 1
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
+            },
+            {       //Level 2
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
+            }
     };
 
     private     boolean in = true;
@@ -179,50 +173,11 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     }
 
     // chargement du niveau a partir du tableau de reference du niveau
-    private void loadlevel(int lvl)
-    {
-        switch (lvl)
-        {
-            case 0:
-            {
-                for (int i=0; i< carteHeight; i++)
-                {
-                    for (int j=0; j< carteWidth; j++)
-                    {
-                        carte[i][j]= ref[i][j];
-                        carteprev[i][j]= refprev[i][j];
-                    }
-                }
-                break;
-            }
-            case 1:
-            {
-
-                for (int i=0; i< carteHeight; i++)
-                {
-                    for (int j=0; j< carteWidth; j++)
-                    {
-                        carte[i][j]= ref2[i][j];
-                        carteprev[i][j]= refprev2[i][j];
-                    }
-                }
-                break;
-            }
-            case 2:
-            {
-                for (int i=0; i< carteHeight; i++)
-                {
-                    for (int j=0; j< carteWidth; j++)
-                    {
-                        carte[i][j]= ref3[i][j];
-                        carteprev[i][j]= refprev3[i][j];
-                    }
-                }
-                break;
-            }
-            default:
-            {
-                break;
+    private void loadlevel(int lvl) {
+        for (int i = 0; i < carteHeight; i++) {
+            for (int j = 0; j < carteWidth; j++) {
+                carte[i][j] = ref[lvl][i][j];
+                carteprev[i][j] = refprev[lvl][i][j];
             }
         }
     }
@@ -270,16 +225,9 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         tmenum      = BitmapFactory.decodeResource(mRes, R.drawable.menum);
         menum       = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
 
-        imtplay         = BitmapFactory.decodeResource(mRes, R.drawable.play);
-        imtplaypressed  = BitmapFactory.decodeResource(mRes, R.drawable.playpressed);
-        imtsettings  = BitmapFactory.decodeResource(mRes, R.drawable.settings);
-        imtsettingspressed  = BitmapFactory.decodeResource(mRes, R.drawable.settingspressed);
+
         tlock         = BitmapFactory.decodeResource(mRes, R.drawable.lock);
         tsucces         = BitmapFactory.decodeResource(mRes, R.drawable.succes);
-        implay          = Bitmap.createScaledBitmap(imtplay, carteTileWidth, carteTileHeight, true);
-        implaypressed   = Bitmap.createScaledBitmap(imtplaypressed, carteTileWidth, carteTileHeight, true);
-        imsettings   = Bitmap.createScaledBitmap(imtsettings, carteTileWidth, carteTileHeight, true);
-        imsettingspressed   = Bitmap.createScaledBitmap(imtsettingspressed, carteTileWidth, carteTileHeight, true);
         lock   = Bitmap.createScaledBitmap(tlock, lockTileWidth, lockTileHeight, true);
         succes   = Bitmap.createScaledBitmap(tsucces, lockTileWidth, lockTileHeight, true);
 
@@ -365,18 +313,6 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         canvas.drawBitmap(menui, cartePrevLeftAnchor/5, cartePrevTopAnchor, null);
     }
 
-    private void paintmenum(Canvas canvas)
-    {
-        canvas.drawBitmap(menum, 0, 0, null);
-        if(!lock_rowx)
-            canvas.drawBitmap(implay, (int)(screenX/4), (int)(screenY - screenY/carteHeight), null);
-        else
-            canvas.drawBitmap(implaypressed, (int)(screenX/4), (int)(screenY - screenY/carteHeight), null);
-        if(!lock_rowy)
-            canvas.drawBitmap(imsettings, (int)(screenX - carteTileWidth - screenX/4), (int)(screenY - screenY/carteHeight), null);
-        else
-            canvas.drawBitmap(imsettingspressed, (int)(screenX - carteTileWidth - screenX/4), (int)(screenY - screenY/carteHeight), null);
-    }
 
     private void paintlvl(Canvas canvas)
     {
@@ -465,11 +401,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private void nDraw(Canvas canvas)
     {
         canvas.drawRGB(44,44,44);
-        if(bmenu)
-        {
-            paintmenum(canvas);
-        }
-        else if(bmenulevel)
+
+        if(bmenulevel)
         {
             paintlvl(canvas);
         }
@@ -582,72 +515,34 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         return nb-1;
     }
 
+    public interface IMyEventListener
+    {
+        public void onEventAccured();
+    }
+
+    public void setEventListener(IntelligentWorkout.IMyEventListener mEventListener)
+    {
+        this.mEventListener = mEventListener;
+    }
+
     // fonction permettant de recuperer les evenements tactiles
     public boolean onTouchEvent (MotionEvent event)
     {
+        if (mEventListener != null)
+        {
+            mEventListener.onEventAccured();
+        }
+
         double x = event.getX();
         double y = event.getY();
 
         if(bmenu) //while menu
         {
-            switch (event.getAction())
-            {
-                case MotionEvent.ACTION_DOWN:
-                    //touch sur play
-                    if(x > (screenX/4) && x < (screenX/4 + carteTileWidth)
-                            && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
-                        lock_rowx = true;
-                    //touch sur settings
-                    if(x > (screenX - carteTileWidth - screenX/4) && x < (screenX - screenX/4)
-                            && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
-                        lock_rowy = true;
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    //out of play
-                    if(x < (screenX/4) || x > (screenX/4 + carteTileWidth)
-                            || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight) {
-                        lock_rowx = false;
-                    }
-                    //out of settings
-                    if(x < (screenX - carteTileWidth - screenX/4) || x > (screenX - screenX/4)
-                            || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight)
-                        lock_rowy = false;
-                    break;
-                case MotionEvent.ACTION_UP:
-                    //touch sur play
-                    if (lock_rowx)
-                    {
-                        bmenu = false;
-                        lock_rowx = false;
-                        bmenulevel = true;
-                    }
-                    //touch sur settings
-                    if (lock_rowy)
-                    {
-                        initparameters();//reset lvl
-                        lock_rowy = false;
-                    }
 
-                    break;
-            }
         }
         else if(bmenulevel)
         {
-            switch (event.getAction())
-            {
-                case MotionEvent.ACTION_DOWN:
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    break;
-                case MotionEvent.ACTION_UP:
-                    //Log.i("TAG", "" + indice_lvl(x, y));
-                    lvl = indice_lvl(x, y);
-                    if (lvl < nblevel) {
-                        bmenulevel = false;
-                        loadlevel(lvl);
-                    }
-                    break;
-            }
+
         }
         else //while in level
         {
