@@ -8,9 +8,18 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Random;
+import java.util.stream.DoubleStream;
+
+import static java.lang.System.exit;
 
 public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHolder.Callback, Runnable
 {
@@ -54,6 +63,10 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     static int          lockTileHeight = 0;
     static final int    carteWidth    = 5;
     static final int    carteHeight   = 5;
+
+
+    int [][][] rand_ref; //Initialisé dans rand_generatelevel
+    int [][][] rand_ref_prev; //Initialisé dans rand_generatelevel
 
     int [][][] ref    = {
             {       //Level 0
@@ -261,5 +274,61 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
         }
 
         return true;
+    }
+
+    /*
+    sizex : Taille en x du tableau de niveau
+    sizey : Taille en y du tableau de niveau
+    number_of_levels : Nombre de niveau souhaité
+    percent_... : pourcentage d'apparition des couleurs dans les niveaux (entre 0 et 1)
+     */
+    public void generateLevels(int sizex, int sizey, int number_of_levels,
+                               float percent_blue,float percent_red,float percent_green) {
+        //Évite pour un pourcentage d'être plus grand que 100%
+        if ((percent_blue + percent_red + percent_green) != 1.0) {
+            Log.i("ERROR",
+                    "ERR_BLOCK_PERCENTAGE(Percentage must cumulate to be equal to 1");
+            exit(0);
+        }
+        long seed = 1; // Seed pour l'aléatoire
+        Random rand_gen = new Random(seed); // Aléatoire servant pour la sélection d'une couleur
+        float whois; // Variable contenant ce dernier pourcentage
+
+        //Liste d'indice aléatoire pour Y (évite les doublons)
+        ArrayList<Integer> Rand_verticeY= new ArrayList<Integer>(sizey);
+        for(int number = 0 ; number < sizey ; number++)
+            Rand_verticeY.add(number);
+        //Liste d'indice aléatoire pour X (évite les doublons)
+        ArrayList<Integer> Rand_verticeX= new ArrayList<Integer>(sizex);
+        for(int number = 0 ; number < sizey ; number++)
+            Rand_verticeX.add(number);
+        //Tableau contenant les niveaux aléatoire
+        rand_ref = new int[number_of_levels][sizey][sizex];
+        //Tableau contenant les preview des niveaux aléatoire
+        rand_ref_prev = new int[number_of_levels][sizey][sizex];
+
+        for (int level = 0; level < number_of_levels; level++) {
+            Collections.shuffle(Rand_verticeX);//Mélange les X
+            Collections.shuffle(Rand_verticeY);//Mélange les Y
+            for (int line = 0; line < sizey; line++) {
+                for (int col = 0; col < sizex; col++) {
+                    whois = rand_gen.nextFloat(); //Test d'un pourcentage
+                    //Je suis bleu!
+                    if (whois <= percent_blue) {
+                        rand_ref[level][line][col] = CST_blueblock;
+                        rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_blueblock;
+                    //Je suis rouge!
+                    } else if (whois > percent_blue && whois <= (percent_blue + percent_red)) {
+                        rand_ref[level][line][col] = CST_redblock;
+                        rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_redblock;
+                    //Je suis vert!
+                    } else if (whois > (percent_blue + percent_red)) {
+                        rand_ref[level][line][col] = CST_greenblock;
+                        rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_greenblock;
+                    }
+                }
+            }
+        }
+
     }
 }
