@@ -308,7 +308,7 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
             Collections.shuffle(Rand_verticeY);//Mélange les Y
             for (int line = 0; line < sizey; line++) {
                 for (int col = 0; col < sizex; col++) {
-                    whois = rand_gen.nextFloat(); //Test d'un pourcentage
+                    whois = rand_gen.nextFloat(); //Test d'un pourcentage (entre 0 et 1)
                     //Je suis bleu!
                     if (whois <= percent_blue) {
                         rand_ref[level][line][col] = CST_blueblock;
