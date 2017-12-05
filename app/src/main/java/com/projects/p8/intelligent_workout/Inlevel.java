@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 public class Inlevel extends Activity
@@ -16,7 +17,7 @@ public class Inlevel extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        final Intent myIntent = new Intent(Inlevel.this, Menulevel.class);
+        final Intent myIntent = new Intent(Inlevel.this, Win.class);
 
         mIntelligentWorkout = findViewById(R.id.IntelligentWorkout);
         mIntelligentWorkout.setVisibility(View.VISIBLE);
@@ -24,8 +25,12 @@ public class Inlevel extends Activity
         mIntelligentWorkout.setEventListener(new IntelligentWorkout.IMyEventListener() {
 
             @Override
-            public void onEventAccured() {
-                // TODO Auto-generated method stub
+            public void onMenuPressed() {
+                onBackPressed(); // end activity
+            }
+
+            @Override
+            public void onWin() {
                 Inlevel.this.startActivity(myIntent);
             }
         });
