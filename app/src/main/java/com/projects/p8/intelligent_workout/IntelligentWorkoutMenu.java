@@ -253,7 +253,6 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
 
                 break;
         }
-
         return true;
     }
 }

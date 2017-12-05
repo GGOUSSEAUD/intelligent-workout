@@ -21,7 +21,7 @@ public class Inlevel extends Activity
         mIntelligentWorkout = findViewById(R.id.IntelligentWorkout);
         mIntelligentWorkout.setVisibility(View.VISIBLE);
 
-        mIntelligentWorkout.setEventListener(new IntelligentWorkoutMenuLvl.IMyEventListener() {
+        mIntelligentWorkout.setEventListener(new IntelligentWorkout.IMyEventListener() {
 
             @Override
             public void onEventAccured() {

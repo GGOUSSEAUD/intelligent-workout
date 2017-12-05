@@ -16,7 +16,7 @@ public class Menulevel extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        Intent myIntent = new Intent(Menulevel.this, Inlevel.class);
+        final Intent myIntent = new Intent(Menulevel.this, Inlevel.class);
 
         mIntelligentWorkoutMenuLvl = findViewById(R.id.IntelligentWorkoutLvl);
         mIntelligentWorkoutMenuLvl.setVisibility(View.VISIBLE);
