@@ -8,16 +8,13 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
-import java.util.stream.DoubleStream;
 
 import static java.lang.System.exit;
 
@@ -64,9 +61,8 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     static final int    carteWidth    = 5;
     static final int    carteHeight   = 5;
 
-
-    int [][][] rand_ref; //Initialisé dans rand_generatelevel
-    int [][][] rand_ref_prev; //Initialisé dans rand_generatelevel
+    int [][][] rand_ref;
+    int [][][] rand_ref_prev;
 
     int [][][] ref    = {
             {       //Level 0
@@ -277,11 +273,11 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     }
 
     /*
-    sizex : Taille en x du tableau de niveau
-    sizey : Taille en y du tableau de niveau
-    number_of_levels : Nombre de niveau souhaité
-    percent_... : pourcentage d'apparition des couleurs dans les niveaux (entre 0 et 1)
-     */
+   sizex : Taille en x du tableau de niveau
+   sizey : Taille en y du tableau de niveau
+   number_of_levels : Nombre de niveau souhaité
+   percent_... : pourcentage d'apparition des couleurs dans les niveaux (entre 0 et 1)
+    */
     public void generateLevels(int sizex, int sizey, int number_of_levels,
                                float percent_blue,float percent_red,float percent_green) {
         //Évite pour un pourcentage d'être plus grand que 100%
@@ -317,11 +313,11 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
                     if (whois <= percent_blue) {
                         rand_ref[level][line][col] = CST_blueblock;
                         rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_blueblock;
-                    //Je suis rouge!
+                        //Je suis rouge!
                     } else if (whois > percent_blue && whois <= (percent_blue + percent_red)) {
                         rand_ref[level][line][col] = CST_redblock;
                         rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_redblock;
-                    //Je suis vert!
+                        //Je suis vert!
                     } else if (whois > (percent_blue + percent_red)) {
                         rand_ref[level][line][col] = CST_greenblock;
                         rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_greenblock;

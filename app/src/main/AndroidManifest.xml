@@ -4,18 +4,13 @@
     android:configChanges="orientation|keyboardHidden">
 
     <application
+
         android:allowBackup="true"
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:label="@string/app_name"
-            android:name=".Menulevel"
-            android:screenOrientation="portrait"/>
-        <activity android:label="@string/app_name"
-            android:name=".Inlevel"
-            android:screenOrientation="portrait"/>
         <activity android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -24,6 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:label=".Menulevel" android:name=".Menulevel"/>
+        <activity android:label=".Inlevel" android:name=".Inlevel"/>
     </application>
 
 </manifest>
