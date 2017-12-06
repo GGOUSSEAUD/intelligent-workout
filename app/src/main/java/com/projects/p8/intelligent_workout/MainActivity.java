@@ -9,12 +9,14 @@ import android.view.View;
 public class MainActivity extends Activity
 {
     private IntelligentWorkoutMenu mIntelligentWorkoutMenu;
+    ServiceManager MyServiceManager;
+    boolean ServiceBound = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.mainmenu);
 
         final Intent myIntent = new Intent(MainActivity.this, Menulevel.class);
 
@@ -25,7 +27,6 @@ public class MainActivity extends Activity
             @Override
             public void onEventAccured()
             {
-                // TODO Auto-generated method stub
                 MainActivity.this.startActivity(myIntent);
             }
         });

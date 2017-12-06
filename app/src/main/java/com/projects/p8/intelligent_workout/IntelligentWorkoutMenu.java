@@ -76,15 +76,15 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
     public IntelligentWorkoutMenu(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        cv_thread = new Thread(this);
+        cv_thread   = new Thread(this);
 
         // permet d'ecouter les surfaceChanged, surfaceCreated, surfaceDestroyed
-        holder = getHolder();
+        holder      = getHolder();
         holder.addCallback(this);
 
         // chargement des images
-        mContext = context;
-        mRes = mContext.getResources();
+        mContext    = context;
+        mRes        = mContext.getResources();
 
         // prise de focus pour gestion des touches
         setFocusable(true);
@@ -92,34 +92,34 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
 
     public void initparameters()
     {
-        screenX = getWidth();
-        screenY = getHeight();
+        screenX             = getWidth();
+        screenY             = getHeight();
 
-        carteTopAnchor = (int)screenY / 3;
-        carteLeftAnchor = 0;
-        carteTileHeight = (getHeight()-carteTopAnchor) / 5 ;
-        carteTileWidth  = getWidth() / 5;
+        carteTopAnchor      = (int)screenY / 3;
+        carteLeftAnchor     = 0;
+        carteTileHeight     = (getHeight()-carteTopAnchor) / 5 ;
+        carteTileWidth      = getWidth() / 5;
 
-        leftLevelAnchor = (int) screenX/20;
-        topLevelAnchor = (int) screenY/20;
+        leftLevelAnchor     = (int) screenX/20;
+        topLevelAnchor      = (int) screenY/20;
 
-        lockTileWidth = (int)(screenX - 5* leftLevelAnchor)/4;
-        lockTileHeight = (int)(screenY - 6* topLevelAnchor)/5;
+        lockTileWidth       = (int)(screenX - 5* leftLevelAnchor)/4;
+        lockTileHeight      = (int)(screenY - 6* topLevelAnchor)/5;
 
-        cartePrevTopAnchor = (int) screenY/20;
+        cartePrevTopAnchor  = (int) screenY/20;
         cartePrevLeftAnchor = (int) screenX/4;
-        cartePrevTileWidth = ((int) (screenX) - 2*cartePrevLeftAnchor) / carteWidth;
+        cartePrevTileWidth  = ((int) (screenX) - 2*cartePrevLeftAnchor) / carteWidth;
         cartePrevTileHeight = (carteTopAnchor - 2*cartePrevTopAnchor) / carteHeight;
 
-        tmenum      = BitmapFactory.decodeResource(mRes, R.drawable.menum);
-        menum       = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
-        imtplay         = BitmapFactory.decodeResource(mRes, R.drawable.play);
-        imtplaypressed  = BitmapFactory.decodeResource(mRes, R.drawable.playpressed);
-        imtsettings  = BitmapFactory.decodeResource(mRes, R.drawable.settings);
+        tmenum              = BitmapFactory.decodeResource(mRes, R.drawable.menum);
+        menum               = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
+        imtplay             = BitmapFactory.decodeResource(mRes, R.drawable.play);
+        imtplaypressed      = BitmapFactory.decodeResource(mRes, R.drawable.playpressed);
+        imtsettings         = BitmapFactory.decodeResource(mRes, R.drawable.settings);
         imtsettingspressed  = BitmapFactory.decodeResource(mRes, R.drawable.settingspressed);
-        implay          = Bitmap.createScaledBitmap(imtplay, carteTileWidth, carteTileHeight, true);
-        implaypressed   = Bitmap.createScaledBitmap(imtplaypressed, carteTileWidth, carteTileHeight, true);
-        imsettings   = Bitmap.createScaledBitmap(imtsettings, carteTileWidth, carteTileHeight, true);
+        implay              = Bitmap.createScaledBitmap(imtplay, carteTileWidth, carteTileHeight, true);
+        implaypressed       = Bitmap.createScaledBitmap(imtplaypressed, carteTileWidth, carteTileHeight, true);
+        imsettings          = Bitmap.createScaledBitmap(imtsettings, carteTileWidth, carteTileHeight, true);
         imsettingspressed   = Bitmap.createScaledBitmap(imtsettingspressed, carteTileWidth, carteTileHeight, true);
 
         paint = new Paint();
@@ -205,11 +205,6 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
 
     public boolean onTouchEvent(MotionEvent event)
     {
-        if (mEventListener != null)
-        {
-            mEventListener.onEventAccured();
-        }
-
         double x = event.getX();
         double y = event.getY();
 
@@ -235,6 +230,14 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
                 if(x < (screenX - carteTileWidth - screenX/4) || x > (screenX - screenX/4)
                         || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight)
                     lock_rowy = false;
+                //in of play
+                if(x > (screenX/4) && x < (screenX/4 + carteTileWidth)
+                        && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
+                    lock_rowx = true;
+                //in of settings
+                if(x > (screenX - carteTileWidth - screenX/4) && x < (screenX - screenX/4)
+                        && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
+                    lock_rowy = true;
                 break;
             case MotionEvent.ACTION_UP:
                 //touch sur play
@@ -243,6 +246,10 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
                     bmenu = false;
                     lock_rowx = false;
                     bmenulevel = true;
+                    if (mEventListener != null)
+                    {
+                        mEventListener.onEventAccured();
+                    }
                 }
                 //touch sur settings
                 if (lock_rowy)

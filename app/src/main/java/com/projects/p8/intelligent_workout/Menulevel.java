@@ -1,6 +1,5 @@
 package com.projects.p8.intelligent_workout;
 
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,18 +14,18 @@ public class Menulevel extends Activity
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.mainlvl);
+
         final Intent myIntent = new Intent(Menulevel.this, Inlevel.class);
 
-        mIntelligentWorkoutMenuLvl = findViewById(R.id.IntelligentWorkoutLvl);
+        mIntelligentWorkoutMenuLvl = findViewById(R.id.IntelligentWorkoutMenuLvl);
         mIntelligentWorkoutMenuLvl.setVisibility(View.VISIBLE);
 
         mIntelligentWorkoutMenuLvl.setEventListener(new IntelligentWorkoutMenuLvl.IMyEventListener() {
 
             @Override
             public void onEventAccured() {
-                // TODO Auto-generated method stub
-                Menulevel.this.startActivity(myIntent);
+                    Menulevel.this.startActivity(myIntent);
             }
         });
     }
