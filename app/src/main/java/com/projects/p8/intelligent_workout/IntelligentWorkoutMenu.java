@@ -14,16 +14,21 @@ import android.view.SurfaceView;
 
 public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder.Callback, Runnable
 {
-    private Bitmap tmenum;
     private Bitmap menum;
-    private Bitmap imtplay;
     private Bitmap implay;
-    private Bitmap imtplaypressed;
     private Bitmap implaypressed;
-    private Bitmap imtsettings;
     private Bitmap imsettings;
-    private Bitmap imtsettingspressed;
     private Bitmap imsettingspressed;
+    private Bitmap interin;
+    private Bitmap interout;
+
+    private int ximplay;
+    private int ximsettings;
+    private int xinterin;
+
+    private int yimplay;
+    private int yimsettings;
+    private int yinterin;
 
     int        carteTopAnchor;                   // coordonnées en Y du point d'ancrage de notre carte
     int        carteLeftAnchor;                  // coordonnées en X du point d'ancrage de notre carte
@@ -45,21 +50,9 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
     static int          lockTileWidth       = 0;
     static int          lockTileHeight      = 0;
 
-    // indice_carte courant du touchEvent
-    static int iX = -1;
-    static int iY = -1;
-    boolean lock_row;
-    boolean lock_rowx;
-    boolean lock_rowy;
-    boolean bmenu;
-    boolean bmenulevel;
-    boolean bplaypressed;
-
-    // valeur courante du touchEvent
-    static double touchX;
-    static double touchY;
-    static double touchDebutX;
-    static double touchDebutY;
+    boolean lock_inter;
+    boolean lock_play;
+    boolean lock_settings;
 
     private IMyEventListener mEventListener;
 
@@ -92,6 +85,14 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
 
     public void initparameters()
     {
+        Bitmap tmenum;
+        Bitmap imtplay;
+        Bitmap imtplaypressed;
+        Bitmap imtsettings;
+        Bitmap imtsettingspressed;
+        Bitmap tinterin;
+        Bitmap tinterout;
+
         screenX             = getWidth();
         screenY             = getHeight();
 
@@ -112,15 +113,27 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
         cartePrevTileHeight = (carteTopAnchor - 2*cartePrevTopAnchor) / carteHeight;
 
         tmenum              = BitmapFactory.decodeResource(mRes, R.drawable.menum);
-        menum               = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
         imtplay             = BitmapFactory.decodeResource(mRes, R.drawable.play);
         imtplaypressed      = BitmapFactory.decodeResource(mRes, R.drawable.playpressed);
         imtsettings         = BitmapFactory.decodeResource(mRes, R.drawable.settings);
         imtsettingspressed  = BitmapFactory.decodeResource(mRes, R.drawable.settingspressed);
+        tinterin            = BitmapFactory.decodeResource(mRes, R.drawable.interin);
+        tinterout           = BitmapFactory.decodeResource(mRes, R.drawable.interout);
+        menum               = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
         implay              = Bitmap.createScaledBitmap(imtplay, carteTileWidth, carteTileHeight, true);
         implaypressed       = Bitmap.createScaledBitmap(imtplaypressed, carteTileWidth, carteTileHeight, true);
         imsettings          = Bitmap.createScaledBitmap(imtsettings, carteTileWidth, carteTileHeight, true);
         imsettingspressed   = Bitmap.createScaledBitmap(imtsettingspressed, carteTileWidth, carteTileHeight, true);
+        interin             = Bitmap.createScaledBitmap(tinterin, carteTileWidth, carteTileHeight, true);
+        interout            = Bitmap.createScaledBitmap(tinterout, carteTileWidth, carteTileHeight, true);
+
+        ximplay = (int)(screenX/6);
+        ximsettings = ximplay + carteTileWidth + (int)screenX/10;
+        xinterin = ximsettings + carteTileWidth + (int)screenX/12;
+
+        yimplay = (int)(screenY - screenY/carteHeight);
+        yimsettings = (int)(screenY - screenY/carteHeight);
+        yinterin = (int)(screenY - screenY/carteHeight);
 
         paint = new Paint();
         paint.setColor(0xff0000);
@@ -133,6 +146,10 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
         paint.setStrokeWidth(3);
         paint.setTextAlign(Paint.Align.LEFT);
 
+        lock_inter = false;
+        lock_play = false;
+        lock_settings = false;
+
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
             Log.e("-FCT-", "cv_thread.start()");
@@ -142,14 +159,18 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
     private void paintmenum(Canvas canvas)
     {
         canvas.drawBitmap(menum, 0, 0, null);
-        if(!lock_rowx)
-            canvas.drawBitmap(implay, (int)(screenX/4), (int)(screenY - screenY/carteHeight), null);
+        if(!lock_play)
+            canvas.drawBitmap(implay, ximplay, yimplay, null);
         else
-            canvas.drawBitmap(implaypressed, (int)(screenX/4), (int)(screenY - screenY/carteHeight), null);
-        if(!lock_rowy)
-            canvas.drawBitmap(imsettings, (int)(screenX - carteTileWidth - screenX/4), (int)(screenY - screenY/carteHeight), null);
+            canvas.drawBitmap(implaypressed, ximplay, yimplay, null);
+        if(!lock_settings)
+            canvas.drawBitmap(imsettings, ximsettings, yimsettings, null);
         else
-            canvas.drawBitmap(imsettingspressed, (int)(screenX - carteTileWidth - screenX/4), (int)(screenY - screenY/carteHeight), null);
+            canvas.drawBitmap(imsettingspressed, ximsettings, yimsettings, null);
+        if(!lock_inter)
+            canvas.drawBitmap(interin, xinterin, yinterin, null);
+        else
+            canvas.drawBitmap(interout, xinterin, yinterin, null);
     }
 
     private void nDraw(Canvas canvas)
@@ -159,15 +180,19 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        in = true;
         Log.i("-> FCT <-", "surfaceChanged " + width + " - " + height);
         initparameters();
     }
 
     public void surfaceCreated(SurfaceHolder arg0) {
+        in = true;
         Log.i("-> FCT <-", "surfaceCreated");
     }
 
-    public void surfaceDestroyed(SurfaceHolder arg0) {
+    public void surfaceDestroyed(SurfaceHolder arg0)
+    {
+        in = false;
         Log.i("-> FCT <-", "surfaceDestroyed");
     }
 
@@ -195,7 +220,9 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
 
     public interface IMyEventListener
     {
-        public void onEventAccured();
+        public void onEventStart();
+        public void onEventSettings();
+        public void onEventAbout();
     }
 
     public void setEventListener(IMyEventListener mEventListener)
@@ -212,52 +239,57 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
         {
             case MotionEvent.ACTION_DOWN:
                 //touch sur play
-                if(x > (screenX/4) && x < (screenX/4 + carteTileWidth)
-                        && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
-                    lock_rowx = true;
+                if(x > ximplay && x < ximplay + carteTileWidth && y > yimplay && y < yimplay + carteTileHeight)
+                    lock_play = true;
                 //touch sur settings
-                if(x > (screenX - carteTileWidth - screenX/4) && x < (screenX - screenX/4)
-                        && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
-                    lock_rowy = true;
+                if(x > ximsettings && x < ximsettings + carteTileWidth && y > yimsettings && y < yimsettings + carteTileHeight)
+                    lock_settings = true;
+                //touch sur a propos
+                if(x > xinterin && x < xinterin + carteTileWidth && y > yinterin && y < yinterin + carteTileHeight)
+                    lock_inter = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 //out of play
-                if(x < (screenX/4) || x > (screenX/4 + carteTileWidth)
-                        || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight) {
-                    lock_rowx = false;
-                }
+                if(x < ximplay || x > ximplay || y < yimplay || y > yimplay)
+                    lock_play = false;
                 //out of settings
-                if(x < (screenX - carteTileWidth - screenX/4) || x > (screenX - screenX/4)
-                        || y < screenY - screenY/carteHeight || y > screenY - screenY/carteHeight + carteTileHeight)
-                    lock_rowy = false;
-                //in of play
-                if(x > (screenX/4) && x < (screenX/4 + carteTileWidth)
-                        && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
-                    lock_rowx = true;
-                //in of settings
-                if(x > (screenX - carteTileWidth - screenX/4) && x < (screenX - screenX/4)
-                        && y > screenY - screenY/carteHeight && y < screenY - screenY/carteHeight + carteTileHeight)
-                    lock_rowy = true;
+                if(x < ximsettings || x > ximsettings || y < yimsettings || y > yimsettings)
+                    lock_settings = false;
+                //out of a propos
+                if(x < xinterin || x > xinterin || y < yinterin || y > yinterin)
+                    lock_inter = false;
+                //touch again sur play
+                if(x > ximplay && x < ximplay + carteTileWidth && y > yimplay && y < yimplay + carteTileHeight)
+                    lock_play = true;
+                //touch again sur settings
+                if(x > ximsettings && x < ximsettings + carteTileWidth && y > yimsettings && y < yimsettings + carteTileHeight)
+                    lock_settings = true;
+                //touch sur a propos
+                if(x > xinterin && x < xinterin + carteTileWidth && y > yinterin && y < yinterin + carteTileHeight)
+                    lock_inter = true;
                 break;
             case MotionEvent.ACTION_UP:
-                //touch sur play
-                if (lock_rowx)
+                //touch up sur play
+                if (lock_play)
                 {
-                    bmenu = false;
-                    lock_rowx = false;
-                    bmenulevel = true;
+                    lock_play = false;
                     if (mEventListener != null)
                     {
-                        mEventListener.onEventAccured();
+                        mEventListener.onEventStart();
                     }
                 }
-                //touch sur settings
-                if (lock_rowy)
+                //touch up sur settings
+                if (lock_settings)
                 {
-                    initparameters();//reset lvl
-                    lock_rowy = false;
+                    lock_settings = false;
+                    mEventListener.onEventSettings();
                 }
-
+                //touch sur settings
+                if (lock_inter)
+                {
+                    lock_inter = false;
+                    mEventListener.onEventAbout();
+                }
                 break;
         }
         return true;

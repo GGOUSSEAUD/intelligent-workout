@@ -35,6 +35,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private Bitmap      menui;
     private Bitmap      tmenum;
     private Bitmap      menum;
+    private Bitmap      menuioff;
+    private Bitmap      tmenuioff;
 
     private Bitmap tbackground;
     private Bitmap background;
@@ -90,6 +92,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private int yretry;
     private int xmenui;
     private int ymenui;
+    private int xecartmenui;
+    private int yecartmenui;
     private int xplay;
     private int yplay;
     private int iconWinWidth;
@@ -111,6 +115,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     boolean lock_row;
     boolean lock_rowx;
     boolean lock_rowy;
+    boolean lock_menu;
 
     // valeur courante du touchEvent
     static double touchX;
@@ -227,16 +232,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         cartePrevTileWidth = ((int) (screenX) - 2*cartePrevLeftAnchor) / carteWidth;
         cartePrevTileHeight = (carteTopAnchor - 2*cartePrevTopAnchor) / carteHeight;
 
-
         iconWinWidth = cartePrevLeftAnchor/2;
         iconWinHeight = (int) (cartePrevTileHeight*1.5);
         xretry = cartePrevLeftAnchor;
         yretry = (int)screenY-carteTopAnchor-carteTopAnchor/5;
-        xmenui = cartePrevLeftAnchor + cartePrevLeftAnchor/2 + cartePrevLeftAnchor/5;
-        ymenui = (int)screenY-carteTopAnchor-carteTopAnchor/5;
         xplay = cartePrevLeftAnchor + 2*(cartePrevLeftAnchor/2 + cartePrevLeftAnchor/5);
         yplay = (int)screenY-carteTopAnchor-carteTopAnchor/5;
-
 
         //image pour le main board
         tredblock       = BitmapFactory.decodeResource(mRes, R.drawable.redblock);
@@ -256,6 +257,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
 
         tmenui      = BitmapFactory.decodeResource(mRes, R.drawable.menui);
         menui       = Bitmap.createScaledBitmap(tmenui, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenuioff      = BitmapFactory.decodeResource(mRes, R.drawable.menuioff);
+        menuioff       = Bitmap.createScaledBitmap(tmenuioff, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
         tmenum      = BitmapFactory.decodeResource(mRes, R.drawable.menum);
         menum       = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
 
@@ -267,6 +270,11 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         imtplaypressed      = BitmapFactory.decodeResource(mRes, R.drawable.playpressed);
         implay              = Bitmap.createScaledBitmap(imtplay, iconWinWidth, iconWinHeight, true);
         implaypressed       = Bitmap.createScaledBitmap(imtplaypressed, iconWinWidth, iconWinHeight, true);
+
+        xmenui = cartePrevLeftAnchor/5;
+        ymenui = cartePrevTopAnchor;
+        xecartmenui = cartePrevLeftAnchor/2;
+        yecartmenui = (int) (cartePrevTileHeight*1.5);
 
         paint = new Paint();
         paint.setColor(0xff0000);
@@ -288,6 +296,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         lock_rowy = false;
         lock_rowx = false;
         lock_row = false;
+        lock_menu = false;
 
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
@@ -342,7 +351,10 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
 
     private void paintmenui(Canvas canvas, Paint alpha)
     {
-        canvas.drawBitmap(menui, cartePrevLeftAnchor/5, cartePrevTopAnchor, alpha);
+        if(lock_menu)
+            canvas.drawBitmap(menuioff, xmenui, ymenui, alpha);
+        else
+            canvas.drawBitmap(menui, xmenui, ymenui, alpha);
     }
 
     private void decaleCarte (int ind, int num)
@@ -424,11 +436,18 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
         else
         {
+            //icone du menu change de place
+            xecartmenui = iconWinWidth;
+            yecartmenui = iconWinHeight;
+            xmenui = cartePrevLeftAnchor + cartePrevLeftAnchor/2 + cartePrevLeftAnchor/5;
+            ymenui = (int)screenY-carteTopAnchor-carteTopAnchor/5;
+
+            
             canvas.drawBitmap(background, 0, 0, null);
             canvas.drawText("Number of move : " + nbCoup, (int)screenX/2 - (int)screenX/4, (int)screenY/2 - textSize, paint);
             canvas.drawText("Times until end : " + timer, (int)screenX/2 - (int)screenX/4, (int)screenY/2 + textSize, paint);
             canvas.drawBitmap(retry, xretry, yretry, null);
-            canvas.drawBitmap(menui, xmenui, ymenui, null);
+            paintmenui(canvas, null);
             canvas.drawBitmap(implay, xplay, yplay, null);
         }
     }
@@ -483,17 +502,20 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     // callback sur le cycle de vie de la surfaceview
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
     {
+        in = true;
         Log.i("-> FCT <-", "surfaceChanged "+ width +" - "+ height);
         initparameters();
     }
 
     public void surfaceCreated(SurfaceHolder arg0)
     {
+        in = true;
         Log.i("-> FCT <-", "surfaceCreated");
     }
 
     public void surfaceDestroyed(SurfaceHolder arg0)
     {
+        in = false;
         Log.i("-> FCT <-", "surfaceDestroyed");
     }
 
@@ -540,30 +562,20 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         this.mEventListener = mEventListener;
     }
 
-    private boolean lock_menu = false;
-
     // fonction permettant de recuperer les evenements tactiles
     public boolean onTouchEvent (MotionEvent event)
     {
         double x = event.getX();
         double y = event.getY();
 
-        //touch on menuicon
-        if(x > cartePrevLeftAnchor/5 && x < cartePrevLeftAnchor/5 + cartePrevLeftAnchor/2
-                && y > cartePrevTopAnchor && y < cartePrevTopAnchor + (int) (cartePrevTileHeight*1.5)
-                && !boolwin)
-        {
-                mEventListener.onMenuPressed();
-        }
         switch (event.getAction())
         {
             case MotionEvent.ACTION_DOWN:
-                Log.i("TAG", "touched down");
-                if(boolwin)
+                //touch on menuicon
+                if(x > xmenui && x < xmenui + xecartmenui
+                        && y > ymenui && y < ymenui + yecartmenui)
                 {
-                    if(x > xmenui && x < xmenui + iconWinWidth
-                            && y > ymenui && y < ymenui + iconWinHeight)
-                        lock_menu = true;
+                    lock_menu = true;
                 }
                 // Touch on main board screen
                 else if (event.getY() > carteTopAnchor)
@@ -578,14 +590,22 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                //touch on menuicon
+                if(x > xmenui && x < xmenui + xecartmenui
+                        && y > ymenui && y < ymenui + yecartmenui && !lock_row)
+                {
+                    lock_menu = true;
+                }
+                //touch on menuicon
+                if((x < xmenui || x > xmenui + xecartmenui
+                        || y < ymenui || y > ymenui + yecartmenui) && !lock_row)
+                {
+                    lock_menu = false;
+                }
+
                 touchX = x - touchDebutX;
                 touchY = y - touchDebutY;
-                if(boolwin)
-                {
-                    if(x < xmenui || x > xmenui + iconWinWidth
-                            || y < ymenui || y > ymenui + iconWinHeight)
-                        lock_menu = false;
-                }
+
                 //Log.i("-> FCT <-", "val[x, y] = [" + touchX + "," + touchY + "]");
                 if(Math.abs(touchX) > Math.abs(touchY) && !boolwin)
                 {
@@ -599,10 +619,18 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                if(lock_menu)
+                {
+                    lock_menu = false;
+                    mEventListener.onMenuPressed();
+                }
                 if(boolwin)
                 {
                     if(lock_menu)
+                    {
+                        lock_menu = false;
                         mEventListener.onMenuPressed();
+                    }
                 }
                 lock_row = false;
                 lock_rowx = false;

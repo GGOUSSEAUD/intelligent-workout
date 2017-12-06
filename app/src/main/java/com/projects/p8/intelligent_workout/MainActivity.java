@@ -9,8 +9,6 @@ import android.view.View;
 public class MainActivity extends Activity
 {
     private IntelligentWorkoutMenu mIntelligentWorkoutMenu;
-    ServiceManager MyServiceManager;
-    boolean ServiceBound = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
@@ -18,17 +16,36 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mainmenu);
 
-        final Intent myIntent = new Intent(MainActivity.this, Menulevel.class);
+        final Intent menulevelIntent = new Intent(MainActivity.this, Menulevel.class);
+        final Intent settingsIntent = new Intent(MainActivity.this, MySettings.class);
+        final Intent aboutIntent = new Intent(MainActivity.this, MyAbout.class);
 
         mIntelligentWorkoutMenu = findViewById(R.id.IntelligentWorkoutMenu);
         mIntelligentWorkoutMenu.setVisibility(View.VISIBLE);
 
         mIntelligentWorkoutMenu.setEventListener(new IntelligentWorkoutMenu.IMyEventListener() {
             @Override
-            public void onEventAccured()
+            public void onEventStart()
             {
-                MainActivity.this.startActivity(myIntent);
+                MainActivity.this.startActivity(menulevelIntent);
+            }
+
+            @Override
+            public void onEventSettings()
+            {
+                MainActivity.this.startActivity(settingsIntent);
+            }
+
+            @Override
+            public void onEventAbout()
+            {
+                MainActivity.this.startActivity(aboutIntent);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

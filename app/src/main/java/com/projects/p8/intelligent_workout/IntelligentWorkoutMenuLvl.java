@@ -93,7 +93,7 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
         lockTileWidth   = (int)(screenX - 5* leftLevelAnchor)/4;
         lockTileHeight  = (int)(screenY - 6* topLevelAnchor)/5;
 
-        tmenum          = BitmapFactory.decodeResource(mRes, R.drawable.menum);
+        tmenum          = BitmapFactory.decodeResource(mRes, R.drawable.about);
         menum           = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
         tlock           = BitmapFactory.decodeResource(mRes, R.drawable.lock);
         tsucces         = BitmapFactory.decodeResource(mRes, R.drawable.succes);
@@ -160,15 +160,18 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        in = true;
         Log.i("-> FCT <-", "surfaceChanged " + width + " - " + height);
         initparameters();
     }
 
     public void surfaceCreated(SurfaceHolder arg0) {
+        in = true;
         Log.i("-> FCT <-", "surfaceCreated");
     }
 
     public void surfaceDestroyed(SurfaceHolder arg0) {
+        in = false;
         Log.i("-> FCT <-", "surfaceDestroyed");
     }
 

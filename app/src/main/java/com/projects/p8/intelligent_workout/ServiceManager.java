@@ -13,8 +13,8 @@ import java.io.IOException;
 
 public class ServiceManager extends Service {
     private IBinder mBinder = new BinderInterface();
-    int musicID = getResources().getIdentifier("elev_music.mp3","raw", getPackageName());
     MediaPlayer player;
+    int musicpos = 0;
 
     public ServiceManager() {
     }
@@ -22,14 +22,13 @@ public class ServiceManager extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        player = new MediaPlayer();
         try {
             AssetFileDescriptor afd = getAssets().openFd("elev_music.mp3");
+            player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        player = MediaPlayer.create(this,musicID);
-
-        //player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
 
         try {
             player.prepare();
@@ -39,11 +38,44 @@ public class ServiceManager extends Service {
             player.start();
         }
 
+    public void setNewMusic(String musicname){
+        try {
+            AssetFileDescriptor afd = getAssets().openFd(musicname);
+            player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            player.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void playMusic(){
+        player.start();
+    }
+
+    public void pauseMusic(){
+        player.pause();
+        musicpos = player.getCurrentPosition();
+    }
+
+    public void reloadmusic(){
+        player.seekTo(musicpos);
+        player.start();
+    }
+
+    public void stopMusic(){
+        player.release();
+    }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+        player.stop();
         player.release();
+        super.onDestroy();
     }
 
     @Override

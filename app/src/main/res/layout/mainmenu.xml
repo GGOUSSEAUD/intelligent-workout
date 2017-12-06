@@ -4,7 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-	<com.projects.p8.intelligent_workout.IntelligentWorkoutMenu android:id="@+id/IntelligentWorkoutMenu"
+	<com.projects.p8.intelligent_workout.IntelligentWorkoutMenu
+		android:id="@+id/IntelligentWorkoutMenu"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent" />
 

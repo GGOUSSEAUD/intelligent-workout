@@ -16,13 +16,16 @@ import android.util.Log;
 public class MyTypeOfActivity extends Activity implements ServiceConnection{
 
     ServiceManager myService;
-    ServiceConnection mServiceConn;
+    boolean mServiceBound = false;
+    Intent intent;
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         //TODO: Classe abstraite à définir
         Log.d("ServiceConnection","connected");
-        //myService = service;
+        ServiceManager.BinderInterface myBinder = (ServiceManager.BinderInterface) service;
+        myService = myBinder.getService();
+        mServiceBound = true;
     }
 
     @Override
@@ -31,23 +34,61 @@ public class MyTypeOfActivity extends Activity implements ServiceConnection{
         Log.d("ServiceConnection","disconnected");
         myService = null;
     }
-
     @Override
     protected void onStart() {
         super.onStart();
-        bindService(new Intent("com.projects.p8.intelligent_workout.ServiceManager"),mServiceConn , Context.BIND_AUTO_CREATE);
+        Log.e("MyTypeOfActivity","Beginning onStart()");
+        intent = new Intent(this, ServiceManager.class);
+        startService(intent);
+        bindService(intent,mServiceConn , Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mServiceBound) {
+            myService.stopMusic();
+            unbindService(mServiceConn);
+            mServiceBound = false;
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myService.onDestroy();
     }
 
     @Override
     protected void onResume() {
-
         super.onResume();
+        if(mServiceBound){
+            myService.reloadmusic();
+        }
     }
 
     @Override
     protected void onPause() {
-
         super.onPause();
+        myService.pauseMusic();
     }
+
+    private ServiceConnection mServiceConn = new ServiceConnection() {
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.e("Service connection","Im disconnected activity");
+            mServiceBound = false;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e("Service connection","Im connected through activity");
+            ServiceManager.BinderInterface myBinder = (ServiceManager.BinderInterface) service;
+            myService = myBinder.getService();
+            mServiceBound = true;
+        }
+    };
 
 }
