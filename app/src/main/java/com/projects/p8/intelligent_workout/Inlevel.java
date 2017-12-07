@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-public class Inlevel extends Activity
+public class Inlevel extends MyTypeOfActivity
 {
     private IntelligentWorkout mIntelligentWorkout;
 
@@ -15,6 +15,7 @@ public class Inlevel extends Activity
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.level_music = "elev_music2.mp3";
         setContentView(R.layout.main);
 
         //final Intent myIntent = new Intent(Inlevel.this, Win.class);

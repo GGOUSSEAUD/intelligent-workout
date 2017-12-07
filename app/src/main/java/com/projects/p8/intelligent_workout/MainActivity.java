@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-public class MainActivity extends Activity
+public class MainActivity extends MyTypeOfActivity
 {
     private IntelligentWorkoutMenu mIntelligentWorkoutMenu;
 
@@ -14,6 +14,7 @@ public class MainActivity extends Activity
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.level_music = "elev_music.mp3";
         setContentView(R.layout.mainmenu);
 
         final Intent menulevelIntent = new Intent(MainActivity.this, Menulevel.class);
@@ -42,6 +43,37 @@ public class MainActivity extends Activity
                 MainActivity.this.startActivity(aboutIntent);
             }
         });
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        /*if(mServiceBound)
+            myService.pauseMusic();
+    */
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //System.out.println("Onstart mservicebound is" + mServiceBound);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        /*if(mServiceBound){
+            System.out.println("Im supposed to do my job but I don't");
+            myService.setNewMusic("elev_music.mp3");
+            myService.playMusic();
+        }*/
     }
 
     @Override

@@ -442,7 +442,6 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             xmenui = cartePrevLeftAnchor + cartePrevLeftAnchor/2 + cartePrevLeftAnchor/5;
             ymenui = (int)screenY-carteTopAnchor-carteTopAnchor/5;
 
-            
             canvas.drawBitmap(background, 0, 0, null);
             canvas.drawText("Number of move : " + nbCoup, (int)screenX/2 - (int)screenX/4, (int)screenY/2 - textSize, paint);
             canvas.drawText("Times until end : " + timer, (int)screenX/2 - (int)screenX/4, (int)screenY/2 + textSize, paint);

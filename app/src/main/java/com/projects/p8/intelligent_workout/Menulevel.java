@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-public class Menulevel extends Activity
+public class Menulevel extends MyTypeOfActivity
 {
     private IntelligentWorkoutMenuLvl mIntelligentWorkoutMenuLvl;
 
@@ -14,6 +14,7 @@ public class Menulevel extends Activity
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.level_music = "wii_music.mp3";
         setContentView(R.layout.mainlvl);
 
         final Intent myIntent = new Intent(Menulevel.this, Inlevel.class);

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-public class MySettings extends Activity
+public class MySettings extends MyTypeOfActivity
 {
     private IntelligentWorkoutSettings mIntelligentWorkoutSettings;
 
@@ -13,6 +13,7 @@ public class MySettings extends Activity
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.level_music = "elev_music3.mp3";
         setContentView(R.layout.mainsettings);
 
         mIntelligentWorkoutSettings = findViewById(R.id.IntelligentWorkoutSettings);
@@ -23,6 +24,15 @@ public class MySettings extends Activity
             public void onMenuPressed() {
                 onBackPressed();
             }
+
+            public void onSoundPressed(boolean music_state){
+
+            }
+
+            public void onMusicPressed(boolean music_state){
+
+            }
+
         });
     }
 }

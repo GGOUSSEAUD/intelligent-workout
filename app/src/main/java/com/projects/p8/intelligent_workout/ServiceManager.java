@@ -15,6 +15,8 @@ public class ServiceManager extends Service {
     private IBinder mBinder = new BinderInterface();
     MediaPlayer player;
     int musicpos = 0;
+    boolean allow_music;
+    boolean allow_sound;
 
     public ServiceManager() {
     }
@@ -22,7 +24,9 @@ public class ServiceManager extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.e("Service Life","onCreate()");
         player = new MediaPlayer();
+        /*player = new MediaPlayer();
         try {
             AssetFileDescriptor afd = getAssets().openFd("elev_music.mp3");
             player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
@@ -35,18 +39,41 @@ public class ServiceManager extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-            player.start();
+            player.start();*/
         }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.e("Service Life","onStartCommand()");
+        player = new MediaPlayer();
+        player.setLooping(true);
+        /*try {
+            AssetFileDescriptor afd = getAssets().openFd("elev_music.mp3");
+            player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            player.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player.start();*/
+        return START_STICKY;
+    }
+
     public void setNewMusic(String musicname){
+        Log.e("Service Life","Setting new music");
         try {
             AssetFileDescriptor afd = getAssets().openFd(musicname);
             player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
-
+            Log.e("Service Life","Music DataSource set");
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
+            Log.e("Service Life","Preparing player");
             player.prepare();
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,28 +81,33 @@ public class ServiceManager extends Service {
     }
 
     public void playMusic(){
+        Log.e("Service Life","PlayMusic()");
         player.start();
     }
 
     public void pauseMusic(){
+        Log.e("Service Life","pauseMusic()");
         player.pause();
         musicpos = player.getCurrentPosition();
     }
 
     public void reloadmusic(){
+        Log.e("Service Life","reloadmusic()");
         player.seekTo(musicpos);
         player.start();
     }
 
     public void stopMusic(){
+        Log.e("Service Life","stopMusic()");
         player.release();
     }
 
     @Override
     public void onDestroy() {
-        player.stop();
-        player.release();
+        Log.e("Service Manager","Before destroy");
         super.onDestroy();
+        Log.e("Service Manager","Destroyed");
+        //player.release();
     }
 
     @Override
@@ -91,6 +123,12 @@ public class ServiceManager extends Service {
     return true;
     }
 
+    @Override
+    public void onRebind(Intent intent) {
+        Log.e("Service Life","OnRebind");
+        super.onRebind(intent);
+        Log.e("Service Life","OnRebind Done");
+    }
 
     public class BinderInterface extends Binder
 

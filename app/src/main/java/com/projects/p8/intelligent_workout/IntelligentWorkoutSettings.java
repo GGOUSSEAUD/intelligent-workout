@@ -249,6 +249,7 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
                         && y > yimsound && y < yimsound + carteTileHeight)
                 {
                     lock_sound = !lock_sound;
+
                 }
                 //touch on music
                 if(x > ximmusic && x < ximmusic + carteTileWidth
@@ -277,8 +278,10 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
                     mEventListener.onMenuPressed();
                 }
                 if(lock_sound)
+
                     ;
                 if(lock_music)
+
                     ;
                 break;
         }
