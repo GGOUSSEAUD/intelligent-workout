@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">INTELLIGENT-WORKOUT</string>
+    <string name="sharedpref">RapidoAndGaetanIW</string>
+    <string name="music_allowance">music_allowance</string>
+    <string name="sound_allowance">sound_allowance</string>
 </resources>

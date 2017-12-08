@@ -29,6 +29,21 @@ public class Inlevel extends MyTypeOfActivity
             public void onMenuPressed() {
                 onBackPressed(); // end activity
             }
+
+            @Override
+            public void onRetryPressed() {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+
+            @Override
+            public void onContinuePressed() {
+                //reste a incrementer la variable lvl ici (j'espere que le service peut gerer sa ?)
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
         });
     }
 }

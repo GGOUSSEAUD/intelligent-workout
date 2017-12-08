@@ -2,21 +2,25 @@ package com.projects.p8.intelligent_workout;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Chronometer;
 
 import java.io.IOException;
 
 public class ServiceManager extends Service {
     private IBinder mBinder = new BinderInterface();
     MediaPlayer player;
+    MediaPlayer sound_player;
     int musicpos = 0;
     boolean allow_music;
     boolean allow_sound;
+    SharedPreferences sharedpref;
 
     public ServiceManager() {
     }
@@ -26,6 +30,8 @@ public class ServiceManager extends Service {
         super.onCreate();
         Log.e("Service Life","onCreate()");
         player = new MediaPlayer();
+        sound_player = new MediaPlayer();
+
         /*player = new MediaPlayer();
         try {
             AssetFileDescriptor afd = getAssets().openFd("elev_music.mp3");
@@ -45,22 +51,48 @@ public class ServiceManager extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("Service Life","onStartCommand()");
+        sharedpref = getSharedPreferences(getString(R.string.sharedpref), MODE_PRIVATE);
+
+
+        allow_music= sharedpref.getBoolean(getString(R.string.music_allowance),true);
+        allow_sound= sharedpref.getBoolean(getString(R.string.sound_allowance),true);
         player = new MediaPlayer();
+        sound_player = new MediaPlayer();
         player.setLooping(true);
-        /*try {
-            AssetFileDescriptor afd = getAssets().openFd("elev_music.mp3");
-            player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+        try {
+            AssetFileDescriptor afd = getAssets().openFd("pop.mp3");
+            sound_player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
-            player.prepare();
+            sound_player.prepare();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        player.start();*/
         return START_STICKY;
+    }
+
+    public void setAllow_music(boolean allowance){
+        Log.e("Service life","setting music allowance");
+        System.out.println("Allowance is setting up to " + !allowance);
+        allow_music = !allowance;
+    }
+
+    public boolean getAllow_music(){
+        return allow_music;
+    }
+
+
+    public void setAllow_sound(boolean allowance){
+        Log.e("Service life","setting music allowance");
+        System.out.println("Allowance is setting up to " + !allowance);
+        allow_sound = !allowance;
+    }
+
+    public boolean getAllow_sound(){
+        return allow_sound;
     }
 
     public void setNewMusic(String musicname){
@@ -100,6 +132,10 @@ public class ServiceManager extends Service {
     public void stopMusic(){
         Log.e("Service Life","stopMusic()");
         player.release();
+    }
+
+    public void playsound(){
+        sound_player.start();
     }
 
     @Override

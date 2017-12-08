@@ -118,7 +118,7 @@ public class IntelligentWorkoutAbout extends SurfaceView implements SurfaceHolde
         paint.setColor(Color.GREEN);
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
-        textSize = (int) screenY/10;
+        textSize = (int) screenY/18;
         paint.setTextSize(textSize);
 
         lock_menu = false;

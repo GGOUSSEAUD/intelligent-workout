@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -54,7 +55,6 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private int nbCoup = 0;
     private double timer = 0.0;
 
-
     // Declaration des objets Ressources et Context permettant d'accéder aux ressources de notre application et de les charger
     private Resources 	mRes;
     private Context 	mContext;
@@ -99,6 +99,11 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private int iconWinWidth;
     private int iconWinHeight;
 
+    private int xmovestext;
+    private int ymovestext;
+    private int xtimertext;
+    private int ytimertext;
+
     // taille de la carte
     static final int    carteWidth    = 5;
     static final int    carteHeight   = 5;
@@ -116,6 +121,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     boolean lock_rowx;
     boolean lock_rowy;
     boolean lock_menu;
+    boolean lock_retry;
+    boolean lock_continue;
 
     // valeur courante du touchEvent
     static double touchX;
@@ -180,7 +187,9 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     SurfaceHolder holder;
 
     Paint paint;
-    private int textSize = 60;
+    private int textSize = 0;
+
+    CountDownTimer CDTimer;
 
     public IntelligentWorkout(Context context, AttributeSet attrs)
     {
@@ -201,9 +210,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     }
 
     // chargement du niveau a partir du tableau de reference du niveau
-    private void loadlevel(int lvl) {
-        for (int i = 0; i < carteHeight; i++) {
-            for (int j = 0; j < carteWidth; j++) {
+    private void loadlevel(int lvl)
+    {
+        for (int i = 0; i < carteHeight; i++)
+        {
+            for (int j = 0; j < carteWidth; j++)
+            {
                 carte[i][j] = ref[lvl][i][j];
                 carteprev[i][j] = refprev[lvl][i][j];
             }
@@ -213,6 +225,21 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     // initialisation du jeu
     public void initparameters()
     {
+        final long totalSeconds = 100000;
+        long intervalSeconds = 1;
+
+        CDTimer = new CountDownTimer(totalSeconds * 1000, intervalSeconds * 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                timer = (totalSeconds * 1000 - millisUntilFinished) / 1000;
+            }
+
+            public void onFinish() {
+                Log.d( "done!", "Time's up!");
+            }
+
+        };
+
         screenX = getWidth();
         screenY = getHeight();
 
@@ -244,8 +271,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         tblueblock      = BitmapFactory.decodeResource(mRes, R.drawable.blueblock);
         tgreenblock     = BitmapFactory.decodeResource(mRes, R.drawable.greenblock);
         redblock        = Bitmap.createScaledBitmap(tredblock, carteTileWidth, carteTileHeight, true);
-        blueblock 		= Bitmap.createScaledBitmap(tblueblock, carteTileWidth, carteTileHeight, true);
-        greenblock 		= Bitmap.createScaledBitmap(tgreenblock, carteTileWidth, carteTileHeight, true);
+        blueblock       = Bitmap.createScaledBitmap(tblueblock, carteTileWidth, carteTileHeight, true);
+        greenblock 		  = Bitmap.createScaledBitmap(tgreenblock, carteTileWidth, carteTileHeight, true);
 
         //image pour la preview
         tredblockprev   = BitmapFactory.decodeResource(mRes, R.drawable.redblock);
@@ -255,12 +282,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         blueblockprev 	= Bitmap.createScaledBitmap(tblueblockprev, cartePrevTileWidth, cartePrevTileHeight, true);
         greenblockprev 	= Bitmap.createScaledBitmap(tgreenblockprev, cartePrevTileWidth, cartePrevTileHeight, true);
 
-        tmenui      = BitmapFactory.decodeResource(mRes, R.drawable.menui);
-        menui       = Bitmap.createScaledBitmap(tmenui, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
-        tmenuioff      = BitmapFactory.decodeResource(mRes, R.drawable.menuioff);
-        menuioff       = Bitmap.createScaledBitmap(tmenuioff, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
-        tmenum      = BitmapFactory.decodeResource(mRes, R.drawable.menum);
-        menum       = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
+        tmenui          = BitmapFactory.decodeResource(mRes, R.drawable.menui);
+        menui           = Bitmap.createScaledBitmap(tmenui, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenuioff       = BitmapFactory.decodeResource(mRes, R.drawable.menuioff);
+        menuioff        = Bitmap.createScaledBitmap(tmenuioff, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenum          = BitmapFactory.decodeResource(mRes, R.drawable.menum);
+        menum           = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
 
         tbackground         = BitmapFactory.decodeResource(mRes, R.drawable.win);
         background          = Bitmap.createScaledBitmap(tbackground, (int)screenX, (int)screenY, true);
@@ -271,16 +298,23 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         implay              = Bitmap.createScaledBitmap(imtplay, iconWinWidth, iconWinHeight, true);
         implaypressed       = Bitmap.createScaledBitmap(imtplaypressed, iconWinWidth, iconWinHeight, true);
 
-        xmenui = cartePrevLeftAnchor/5;
-        ymenui = cartePrevTopAnchor;
+        xmenui      = cartePrevLeftAnchor/5;
+        ymenui      = cartePrevTopAnchor;
         xecartmenui = cartePrevLeftAnchor/2;
         yecartmenui = (int) (cartePrevTileHeight*1.5);
+
+        textSize    = (int) screenY/30;
+
+        xmovestext  = cartePrevLeftAnchor + carteWidth*cartePrevTileWidth + cartePrevLeftAnchor/5;
+        ymovestext  = cartePrevTopAnchor + textSize;
+        xtimertext  = cartePrevLeftAnchor + carteWidth*cartePrevTileWidth + cartePrevLeftAnchor/4;
+        ytimertext  = cartePrevTopAnchor + textSize*5;
 
         paint = new Paint();
         paint.setColor(0xff0000);
 
         paint.setDither(true);
-        paint.setColor(Color.BLACK);
+        paint.setColor(Color.YELLOW);
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         paint.setTextSize(textSize);
@@ -297,9 +331,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         lock_rowx = false;
         lock_row = false;
         lock_menu = false;
+        lock_retry = false;
+        lock_continue = false;
 
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
+            CDTimer.start();
             Log.e("-FCT-", "cv_thread.start()");
         }
     }
@@ -357,6 +394,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             canvas.drawBitmap(menui, xmenui, ymenui, alpha);
     }
 
+    private void painttimerandcoup(Canvas canvas, Paint alpha)
+    {
+        canvas.drawText("Moves", xmovestext, ymovestext, alpha);
+        canvas.drawText("" + nbCoup, xmovestext, ymovestext + 2*textSize, alpha);
+        canvas.drawText("Timer", xtimertext, ytimertext, alpha);
+        canvas.drawText("" + timer, xtimertext, ytimertext + 2*textSize, alpha);
+    }
+
     private void decaleCarte (int ind, int num)
     {
         int tmp, i, j;
@@ -399,6 +444,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 carte[0][ind] = tmp;
                 break;
         }
+        nbCoup++;
     }
 
     private boolean isWon()
@@ -420,6 +466,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
 
     public void transition_to_win (Canvas canvas)
     {
+        CDTimer.cancel();
         if (outAlpha > 40)
         {
             paintcarte(canvas, alphaPaint);
@@ -436,6 +483,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
         else
         {
+            paint.setColor(Color.BLACK);
+
             //icone du menu change de place
             xecartmenui = iconWinWidth;
             yecartmenui = iconWinHeight;
@@ -495,6 +544,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             paintcarte(canvas, null);
             paintpreview(canvas, null);
             paintmenui(canvas, null);
+            painttimerandcoup(canvas, paint);
         }
     }
 
@@ -554,6 +604,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     public interface IMyEventListener
     {
         public void onMenuPressed();
+        public void onRetryPressed();
+        public void onContinuePressed();
     }
 
     public void setEventListener(IntelligentWorkout.IMyEventListener mEventListener)
@@ -575,6 +627,16 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                         && y > ymenui && y < ymenui + yecartmenui)
                 {
                     lock_menu = true;
+                }
+                else if(boolwin && (x > xretry && x < xretry + iconWinWidth
+                        && y > yretry && y < yretry + iconWinHeight))
+                {
+                    lock_retry = true;
+                }
+                else if(boolwin && (x > xplay && x < xplay + iconWinWidth
+                        && y > yplay && y < yplay + iconWinHeight))
+                {
+                    lock_continue = true;
                 }
                 // Touch on main board screen
                 else if (event.getY() > carteTopAnchor)
@@ -630,6 +692,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                         lock_menu = false;
                         mEventListener.onMenuPressed();
                     }
+                    if(lock_retry)
+                    {
+                        mEventListener.onRetryPressed();
+                    }
+                    if(lock_continue)
+                    {
+                        mEventListener.onContinuePressed();
+                    }
                 }
                 lock_row = false;
                 lock_rowx = false;
@@ -639,5 +709,4 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
         return true;
     }
-    //((AppCompatActivity) getContext()).finish(); // end activity
 }

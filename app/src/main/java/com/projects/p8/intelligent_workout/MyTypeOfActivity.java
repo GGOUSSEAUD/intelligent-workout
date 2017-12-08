@@ -109,8 +109,11 @@ public class MyTypeOfActivity extends Activity implements ServiceConnection{
             myService = myBinder.getService();
             mServiceBound = true;
 
+            //Play background music
+            System.out.println("What is music allowance?" + myService.getAllow_music());
             myService.setNewMusic(level_music);
-            myService.playMusic();
+            if(myService.getAllow_music())
+                myService.playMusic();
         }
     };
 
