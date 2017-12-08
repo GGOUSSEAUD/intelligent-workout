@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\LE JEUNE\StudioProjects\Android.iml" filepath="C:\Users\LE JEUNE\StudioProjects\Android.iml" />
-      <module fileurl="file://C:\Users\LE JEUNE\floobits\share\GGOUSSEAUD\Android\StudioProjects.iml" filepath="C:\Users\LE JEUNE\floobits\share\GGOUSSEAUD\Android\StudioProjects.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$USER_HOME$/StudioProjects/app/app.iml" filepath="$USER_HOME$/StudioProjects/app/app.iml" />
-      <module fileurl="file://C:\Users\LE JEUNE\floobits\share\GGOUSSEAUD\Android\app\app.iml" filepath="C:\Users\LE JEUNE\floobits\share\GGOUSSEAUD\Android\app\app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/intelligent-workout.iml" filepath="$PROJECT_DIR$/intelligent-workout.iml" />
     </modules>
   </component>
 </project>

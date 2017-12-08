@@ -17,10 +17,14 @@ public class ServiceManager extends Service {
     private IBinder mBinder = new BinderInterface();
     MediaPlayer player;
     MediaPlayer sound_player;
+    MediaPlayer sound_player2;
+    MediaPlayer sound_player3;
     int musicpos = 0;
     boolean allow_music;
     boolean allow_sound;
     SharedPreferences sharedpref;
+    int current_level;
+    int [] _leveldones;
 
     public ServiceManager() {
     }
@@ -31,6 +35,9 @@ public class ServiceManager extends Service {
         Log.e("Service Life","onCreate()");
         player = new MediaPlayer();
         sound_player = new MediaPlayer();
+        sound_player2 = new MediaPlayer();
+        sound_player3 = new MediaPlayer();
+        current_level = 0;
 
         /*player = new MediaPlayer();
         try {
@@ -58,20 +65,43 @@ public class ServiceManager extends Service {
         allow_sound= sharedpref.getBoolean(getString(R.string.sound_allowance),true);
         player = new MediaPlayer();
         sound_player = new MediaPlayer();
+        sound_player2 = new MediaPlayer();
+        sound_player3 = new MediaPlayer();
         player.setLooping(true);
         try {
             AssetFileDescriptor afd = getAssets().openFd("pop.mp3");
             sound_player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+            sound_player2.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+            sound_player3.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(),afd.getLength());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
             sound_player.prepare();
+            sound_player2.prepare();
+            sound_player3.prepare();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return START_STICKY;
+    }
+
+    public void setLeveldones(int[] leveldones){
+    _leveldones = leveldones;
+    }
+
+    public int[] getLeveldones(){
+        return _leveldones;
+    }
+
+    public void setCurrent_level(int new_level){
+        current_level = new_level;
+    }
+
+    public int getCurrent_level(){
+        return current_level;
     }
 
     public void setAllow_music(boolean allowance){
@@ -135,7 +165,14 @@ public class ServiceManager extends Service {
     }
 
     public void playsound(){
-        sound_player.start();
+
+        if(!sound_player.isPlaying())
+            sound_player.start();
+        else if(sound_player.isPlaying())
+            sound_player2.start();
+        else if(sound_player.isPlaying() && sound_player2.isPlaying())
+            sound_player3.start();
+
     }
 
     @Override

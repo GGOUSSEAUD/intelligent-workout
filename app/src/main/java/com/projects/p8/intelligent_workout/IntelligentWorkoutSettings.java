@@ -62,7 +62,7 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
 
     SharedPreferences sharedpref;
 
-    private boolean in = true;
+    public boolean in = true;
     private Thread cv_thread;
     SurfaceHolder holder;
 

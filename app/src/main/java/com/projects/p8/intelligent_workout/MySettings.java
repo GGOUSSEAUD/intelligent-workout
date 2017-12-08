@@ -39,8 +39,17 @@ public class MySettings extends MyTypeOfActivity
         mIntelligentWorkoutSettings.setEventListener(new IntelligentWorkoutSettings.IMyEventListener() {
             public void onSoundPressed(){
                 myService.setAllow_sound(mIntelligentWorkoutSettings.lock_sound);
-
+                if(!mIntelligentWorkoutSettings.lock_sound) {
+                    myService.playsound();
+                    editor.putBoolean(getString(R.string.sound_allowance),!mIntelligentWorkoutSettings.lock_sound);
+                    editor.apply();
+                }
+                else {
+                    editor.putBoolean(getString(R.string.sound_allowance),!mIntelligentWorkoutSettings.lock_sound);
+                    editor.apply();
+                }
             }
+
 
             @Override
             public void onMenuPressed() {

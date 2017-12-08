@@ -52,7 +52,7 @@ public class IntelligentWorkoutAbout extends SurfaceView implements SurfaceHolde
     private Resources mRes;
     private Context mContext;
 
-    private boolean in = true;
+    public boolean in = true;
     private Thread cv_thread;
     SurfaceHolder holder;
 
