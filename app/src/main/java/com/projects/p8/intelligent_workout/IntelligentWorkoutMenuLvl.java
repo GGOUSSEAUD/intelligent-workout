@@ -13,12 +13,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-
-import static java.lang.System.exit;
-
 public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHolder.Callback, Runnable
 {
     private IMyEventListener mEventListener;
@@ -27,6 +21,8 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     private Bitmap      menum;
     private Bitmap      tlock;
     private Bitmap      lock;
+    private Bitmap      tlockrand;
+    private Bitmap      lockrand;
     private Bitmap      tsucces;
     private Bitmap      succes;
 
@@ -36,7 +32,7 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     private Resources mRes;
     private Context mContext;
 
-    private boolean in = true;
+    public boolean in = true;
     private Thread cv_thread;
     SurfaceHolder holder;
 
@@ -47,12 +43,9 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     static final int    CST_blueblock   = 1;
     static final int    CST_greenblock  = 2;
 
-
-    int nblevel = 3;
+    int nblevel = 11;
     int lvl = 0;
     int [] leveldone;
-
-    boolean bmenulevel;
 
     // ancres pour pouvoir centrer la carte du jeu
     int        leftLevelAnchor;
@@ -61,9 +54,6 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     //taille de la carte
     static int          lockTileWidth = 0;
     static int          lockTileHeight = 0;
-
-    int [][][] rand_ref;
-    int [][][] rand_ref_prev;
 
     public IntelligentWorkoutMenuLvl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -96,8 +86,10 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
         tmenum          = BitmapFactory.decodeResource(mRes, R.drawable.about);
         menum           = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
         tlock           = BitmapFactory.decodeResource(mRes, R.drawable.lock);
+        tlockrand       = BitmapFactory.decodeResource(mRes, R.drawable.lockrand);
         tsucces         = BitmapFactory.decodeResource(mRes, R.drawable.succes);
         lock            = Bitmap.createScaledBitmap(tlock, lockTileWidth, lockTileHeight, true);
+        lockrand        = Bitmap.createScaledBitmap(tlockrand, lockTileWidth, lockTileHeight, true);
         succes          = Bitmap.createScaledBitmap(tsucces, lockTileWidth, lockTileHeight, true);
 
         paint = new Paint();
@@ -112,8 +104,8 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
         paint.setTextAlign(Paint.Align.LEFT);
 
         leveldone       = new int[nblevel];
-
-        for (int i = 0; i < nblevel; i++) leveldone[i] = 0;
+        mEventListener.getLvldone();
+        //for (int i = 0; i < nblevel; i++) leveldone[i] = 0;
 
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
@@ -134,12 +126,14 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     private void paintlvl(Canvas canvas)
     {
         int nbimagedraw = 0;
-        int j = 0;
+        int i = 0, j = 0;
         canvas.drawBitmap(menum, 0, 0, null);
 
         //affiche jusqu'à 20 niveaux par page
-        while (nbimagedraw < nblevel) {
-            for (int i = 0; i < 4; i++) {
+        while (nbimagedraw < nblevel)
+        {
+            for (i = 0; i < 4; i++)
+            {
                 if (leveldone[nbimagedraw] == 0)
                     canvas.drawBitmap(lock, leftLevelAnchor + i * lockTileWidth + i * leftLevelAnchor, j * lockTileHeight + topLevelAnchor + j*topLevelAnchor, null);
                 else
@@ -150,10 +144,20 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
             }
             j++;
         }
+        if(i >= 4)
+        {
+            i = 0;
+        }
+        else
+        {
+            j--;
+            i++;
+        }
+        canvas.drawBitmap(lockrand, leftLevelAnchor + i * lockTileWidth + i * leftLevelAnchor, j * lockTileHeight + topLevelAnchor + j*topLevelAnchor, null);
     }
 
-    private void nDraw(Canvas canvas) {
-
+    private void nDraw(Canvas canvas)
+    {
         canvas.drawRGB(44, 44, 44);
 
         paintlvl(canvas);
@@ -200,6 +204,7 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
     public interface IMyEventListener
     {
         public void onEventAccured();
+        public void getLvldone();
     }
 
     public void setEventListener(IntelligentWorkoutMenuLvl.IMyEventListener mEventListener)
@@ -219,11 +224,17 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
             case MotionEvent.ACTION_MOVE:
                 break;
             case MotionEvent.ACTION_UP:
-                //Log.i("TAG", "" + indice_lvl(x, y));
+                Log.i("INDICE LVL", "IM " + indice_lvl(x, y));
                 lvl = indice_lvl(x, y);
                 if (lvl < nblevel)
                 {
-                    bmenulevel = false;
+                    if (mEventListener != null)
+                    {
+                        mEventListener.onEventAccured();
+                    }
+                }
+                if (lvl == nblevel)
+                {
                     if (mEventListener != null)
                     {
                         mEventListener.onEventAccured();
@@ -232,61 +243,5 @@ public class IntelligentWorkoutMenuLvl extends SurfaceView implements SurfaceHol
                 break;
         }
         return true;
-    }
-
-    /*
-   sizex : Taille en x du tableau de niveau
-   sizey : Taille en y du tableau de niveau
-   number_of_levels : Nombre de niveau souhaité
-   percent_... : pourcentage d'apparition des couleurs dans les niveaux (entre 0 et 1)
-    */
-    public void generateLevels(int sizex, int sizey, int number_of_levels,
-                               float percent_blue,float percent_red,float percent_green) {
-        //Évite pour un pourcentage d'être plus grand que 100%
-        if ((percent_blue + percent_red + percent_green) != 1.0) {
-            Log.i("ERROR",
-                    "ERR_BLOCK_PERCENTAGE(Percentage must cumulate to be equal to 1");
-            exit(0);
-        }
-        long seed = 1; // Seed pour l'aléatoire
-        Random rand_gen = new Random(seed); // Aléatoire servant pour la sélection d'une couleur
-        float whois; // Variable contenant ce dernier pourcentage
-
-        //Liste d'indice aléatoire pour Y (évite les doublons)
-        ArrayList<Integer> Rand_verticeY= new ArrayList<Integer>(sizey);
-        for(int number = 0 ; number < sizey ; number++)
-            Rand_verticeY.add(number);
-        //Liste d'indice aléatoire pour X (évite les doublons)
-        ArrayList<Integer> Rand_verticeX= new ArrayList<Integer>(sizex);
-        for(int number = 0 ; number < sizey ; number++)
-            Rand_verticeX.add(number);
-        //Tableau contenant les niveaux aléatoire
-        rand_ref = new int[number_of_levels][sizey][sizex];
-        //Tableau contenant les preview des niveaux aléatoire
-        rand_ref_prev = new int[number_of_levels][sizey][sizex];
-
-        for (int level = 0; level < number_of_levels; level++) {
-            Collections.shuffle(Rand_verticeX);//Mélange les X
-            Collections.shuffle(Rand_verticeY);//Mélange les Y
-            for (int line = 0; line < sizey; line++) {
-                for (int col = 0; col < sizex; col++) {
-                    whois = rand_gen.nextFloat(); //Test d'un pourcentage (entre 0 et 1)
-                    //Je suis bleu!
-                    if (whois <= percent_blue) {
-                        rand_ref[level][line][col] = CST_blueblock;
-                        rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_blueblock;
-                        //Je suis rouge!
-                    } else if (whois > percent_blue && whois <= (percent_blue + percent_red)) {
-                        rand_ref[level][line][col] = CST_redblock;
-                        rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_redblock;
-                        //Je suis vert!
-                    } else if (whois > (percent_blue + percent_red)) {
-                        rand_ref[level][line][col] = CST_greenblock;
-                        rand_ref_prev[level][Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_greenblock;
-                    }
-                }
-            }
-        }
-
     }
 }

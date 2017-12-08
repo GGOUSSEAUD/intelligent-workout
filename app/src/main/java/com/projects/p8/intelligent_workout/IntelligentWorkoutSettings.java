@@ -1,6 +1,7 @@
 package com.projects.p8.intelligent_workout;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -59,7 +60,9 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
     private Resources mRes;
     private Context mContext;
 
-    private boolean in = true;
+    SharedPreferences sharedpref;
+
+    public boolean in = true;
     private Thread cv_thread;
     SurfaceHolder holder;
 
@@ -74,6 +77,8 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
         // permet d'ecouter les surfaceChanged, surfaceCreated, surfaceDestroyed
         holder      = getHolder();
         holder.addCallback(this);
+
+
 
         // chargement des images
         mContext    = context;
@@ -147,8 +152,9 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
         paint.setStrokeWidth(3);
         paint.setTextAlign(Paint.Align.LEFT);
 
-        lock_sound = false;
-        lock_music = false;
+        //lock_sound = false;
+        //lock_music = false;
+
         lock_menu = false;
 
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
@@ -223,6 +229,8 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
     public interface IMyEventListener
     {
         public void onMenuPressed();
+        public void onSoundPressed();
+        public void onMusicPressed();
     }
 
     public void setEventListener(IMyEventListener mEventListener)
@@ -249,12 +257,14 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
                         && y > yimsound && y < yimsound + carteTileHeight)
                 {
                     lock_sound = !lock_sound;
+                    mEventListener.onSoundPressed();
                 }
                 //touch on music
                 if(x > ximmusic && x < ximmusic + carteTileWidth
                         && y > yimmusic && y < yimmusic + carteTileHeight)
                 {
                     lock_music = !lock_music;
+                    mEventListener.onMusicPressed();
                 }
             case MotionEvent.ACTION_MOVE:
                 //touch on menuicon
@@ -277,8 +287,10 @@ public class IntelligentWorkoutSettings extends SurfaceView implements SurfaceHo
                     mEventListener.onMenuPressed();
                 }
                 if(lock_sound)
+
                     ;
                 if(lock_music)
+
                     ;
                 break;
         }

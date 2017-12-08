@@ -23,19 +23,24 @@
         </activity>
         <activity
             android:name=".Menulevel"
-            android:label=".Menulevel" />
+            android:label=".Menulevel"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".Inlevel"
-            android:label=".Inlevel" />
+            android:label=".Inlevel"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MyAbout"
-            android:label=".MyAbout" />
+            android:label=".MyAbout"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MySettings"
-            android:label=".MySettings" />
+            android:label=".MySettings"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MyTypeOfActivity"
-            android:label=".MyTypeOfActivity" />
+            android:label=".MyTypeOfActivity"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".ServiceManager"

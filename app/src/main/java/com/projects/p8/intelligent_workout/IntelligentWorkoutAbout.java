@@ -43,7 +43,7 @@ public class IntelligentWorkoutAbout extends SurfaceView implements SurfaceHolde
     static int          lockTileWidth       = 0;
     static int          lockTileHeight      = 0;
 
-    private int textSize = 100;
+    private int textSize = 0;
 
     boolean lock_menu;
 
@@ -52,7 +52,7 @@ public class IntelligentWorkoutAbout extends SurfaceView implements SurfaceHolde
     private Resources mRes;
     private Context mContext;
 
-    private boolean in = true;
+    public boolean in = true;
     private Thread cv_thread;
     SurfaceHolder holder;
 
@@ -118,10 +118,10 @@ public class IntelligentWorkoutAbout extends SurfaceView implements SurfaceHolde
         paint.setColor(Color.GREEN);
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
+        textSize = (int) screenY/18;
         paint.setTextSize(textSize);
 
         lock_menu = false;
-
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
             Log.e("-FCT-", "cv_thread.start()");
@@ -136,7 +136,7 @@ public class IntelligentWorkoutAbout extends SurfaceView implements SurfaceHolde
         else
             canvas.drawBitmap(menuioff, ximmenui, yimmenui, null);
         canvas.drawText("GOUSSEAUD GAËTAN", textSize, (int)(screenY-screenY/3) - 2*textSize, paint);
-        canvas.drawText("12345678", textSize, (int)(screenY-screenY/3) - textSize, paint);
+        canvas.drawText("13402498", textSize, (int)(screenY-screenY/3) - textSize, paint);
         canvas.drawText("LE JEUNE VINCENT", textSize, (int)(screenY-screenY/3) + textSize, paint);
         canvas.drawText("14505788", textSize, (int)(screenY-screenY/3) + 2*textSize, paint);
     }

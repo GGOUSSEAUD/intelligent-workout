@@ -8,11 +8,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+
+import static java.lang.System.exit;
 
 public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Callback, Runnable {
 
@@ -54,7 +61,6 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private int nbCoup = 0;
     private double timer = 0.0;
 
-
     // Declaration des objets Ressources et Context permettant d'accéder aux ressources de notre application et de les charger
     private Resources 	mRes;
     private Context 	mContext;
@@ -63,10 +69,13 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     int[][] carte;
     int[][] carteprev;
 
+    int [][] rand_ref;
+    int [][] rand_ref_prev;
+
     //tableau pour les niveaux success
     int [] leveldone;
 
-    int nblevel = 3;
+    int nblevel = 11;
     int lvl = 0;
     // constante modelisant les differentes types de cases
     static final int    CST_redblock    = 0;
@@ -99,6 +108,11 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     private int iconWinWidth;
     private int iconWinHeight;
 
+    private int xmovestext;
+    private int ymovestext;
+    private int xtimertext;
+    private int ytimertext;
+
     // taille de la carte
     static final int    carteWidth    = 5;
     static final int    carteHeight   = 5;
@@ -116,6 +130,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     boolean lock_rowx;
     boolean lock_rowy;
     boolean lock_menu;
+    boolean lock_retry;
+    boolean lock_continue;
 
     // valeur courante du touchEvent
     static double touchX;
@@ -147,7 +163,64 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                     {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock},
                     {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock},
                     {CST_redblock, CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock}
+            },
+            {       //Level 3
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
+                    {CST_greenblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_greenblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock}
+            },
+            {       //Level 4
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock}
+            },
+            {       //Level 5
+                    {CST_greenblock, CST_redblock, CST_blueblock, CST_blueblock, CST_greenblock},
+                    {CST_redblock, CST_greenblock, CST_greenblock, CST_greenblock, CST_redblock},
+                    {CST_greenblock, CST_blueblock, CST_blueblock, CST_greenblock, CST_redblock},
+                    {CST_blueblock, CST_greenblock, CST_blueblock, CST_greenblock, CST_redblock},
+                    {CST_blueblock, CST_redblock, CST_redblock, CST_blueblock, CST_redblock}
+            },
+            {       //Level 6
+                    {CST_redblock, CST_redblock, CST_blueblock, CST_redblock, CST_redblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_blueblock, CST_redblock}
+            },
+            {       //Level 7
+                    {CST_redblock, CST_greenblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_greenblock, CST_redblock, CST_greenblock, CST_blueblock, CST_redblock},
+                    {CST_blueblock, CST_redblock, CST_greenblock, CST_blueblock, CST_greenblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_greenblock},
+                    {CST_blueblock, CST_redblock, CST_redblock, CST_blueblock, CST_blueblock}
+            },
+            {       //Level 8
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_redblock},
+                    {CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock, CST_redblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_blueblock}
+            },
+            {       //Level 9
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_blueblock},
+                    {CST_blueblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_blueblock, CST_redblock, CST_blueblock, CST_greenblock, CST_blueblock}
+            },
+            {       //Level 10
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_greenblock, CST_greenblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_greenblock, CST_greenblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_greenblock, CST_greenblock, CST_redblock, CST_redblock, CST_redblock}
             }
+
     };
 
     int [][][] refprev    = {
@@ -172,15 +245,73 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                     {CST_blueblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_blueblock},
                     {CST_blueblock, CST_redblock, CST_blueblock, CST_redblock, CST_blueblock},
                     {CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_blueblock}
+            },
+            {       //Level 3
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_blueblock, CST_greenblock, CST_blueblock, CST_greenblock, CST_blueblock},
+                    {CST_blueblock, CST_blueblock, CST_redblock, CST_blueblock, CST_blueblock},
+                    {CST_blueblock, CST_greenblock, CST_blueblock, CST_greenblock, CST_blueblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock}
+            },
+            {       //Level 4
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock}
+            },
+            {       //Level 5
+                    {CST_blueblock, CST_greenblock, CST_redblock, CST_blueblock, CST_greenblock},
+                    {CST_greenblock, CST_redblock, CST_blueblock, CST_greenblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_greenblock, CST_redblock, CST_blueblock},
+                    {CST_blueblock, CST_greenblock, CST_redblock, CST_blueblock, CST_greenblock},
+                    {CST_greenblock, CST_redblock, CST_blueblock, CST_greenblock, CST_redblock}
+            },
+            {       //Level 6
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_redblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock}
+            },
+            {       //Level 7
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_greenblock, CST_greenblock, CST_greenblock, CST_redblock},
+                    {CST_redblock, CST_greenblock, CST_blueblock, CST_greenblock, CST_redblock}
+            },
+            {       //Level 8
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock}
+            },
+            {       //Level 9
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_greenblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_blueblock, CST_blueblock, CST_blueblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock}
+            },
+            {       //Level 10
+                    {CST_greenblock, CST_redblock, CST_redblock, CST_redblock, CST_greenblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_redblock, CST_greenblock, CST_redblock, CST_greenblock, CST_redblock},
+                    {CST_redblock, CST_redblock, CST_redblock, CST_redblock, CST_redblock},
+                    {CST_greenblock, CST_redblock, CST_redblock, CST_redblock, CST_greenblock}
             }
     };
 
-    private     boolean in = true;
+    public     boolean in = true;
     private     Thread  cv_thread;
     SurfaceHolder holder;
 
     Paint paint;
-    private int textSize = 60;
+    private int textSize = 0;
+
+    CountDownTimer CDTimer;
 
     public IntelligentWorkout(Context context, AttributeSet attrs)
     {
@@ -201,18 +332,68 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     }
 
     // chargement du niveau a partir du tableau de reference du niveau
-    private void loadlevel(int lvl) {
-        for (int i = 0; i < carteHeight; i++) {
-            for (int j = 0; j < carteWidth; j++) {
-                carte[i][j] = ref[lvl][i][j];
-                carteprev[i][j] = refprev[lvl][i][j];
+    private void loadlevel(int lvl, boolean isRand)
+    {
+        if(!isRand)
+            for (int i = 0; i < carteHeight; i++) {
+                for (int j = 0; j < carteWidth; j++) {
+                    carte[i][j] = ref[lvl][i][j];
+                    carteprev[i][j] = refprev[lvl][i][j];
+                }
+            }
+            else{
+            for (int i = 0; i < carteHeight; i++) {
+                for (int j = 0; j < carteWidth; j++) {
+                    carte[i][j] = rand_ref[i][j];
+                    carteprev[i][j] = rand_ref_prev[i][j];
+                }
             }
         }
+
+    }
+
+
+    public void setLvl (int val)
+    {
+        lvl = val;
     }
 
     // initialisation du jeu
     public void initparameters()
     {
+        final long totalSeconds = 100000;
+        long intervalSeconds = 1;
+
+        CDTimer = new CountDownTimer(totalSeconds * 1000, intervalSeconds * 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                timer = (totalSeconds * 1000 - millisUntilFinished) / 1000;
+            }
+
+            public void onFinish() {
+                Log.d( "done!", "Time's up!");
+            }
+
+        };
+
+        carte           = new int[carteHeight][carteWidth];
+        carteprev       = new int[carteHeight][carteWidth];
+
+        mEventListener.getLevelDone();
+        //for (int i = 0; i < nblevel; i++) leveldone[i] = 0;
+
+        mEventListener.onLvlInstancePressed();
+        if(lvl == nblevel )
+        {
+            generateLevels(5,5,0.5f,0.3f,0.2f);
+            loadlevel(lvl,true);
+        }
+        else
+        {
+            loadlevel(lvl,false);
+        }
+
+
         screenX = getWidth();
         screenY = getHeight();
 
@@ -244,8 +425,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         tblueblock      = BitmapFactory.decodeResource(mRes, R.drawable.blueblock);
         tgreenblock     = BitmapFactory.decodeResource(mRes, R.drawable.greenblock);
         redblock        = Bitmap.createScaledBitmap(tredblock, carteTileWidth, carteTileHeight, true);
-        blueblock 		= Bitmap.createScaledBitmap(tblueblock, carteTileWidth, carteTileHeight, true);
-        greenblock 		= Bitmap.createScaledBitmap(tgreenblock, carteTileWidth, carteTileHeight, true);
+        blueblock       = Bitmap.createScaledBitmap(tblueblock, carteTileWidth, carteTileHeight, true);
+        greenblock 		  = Bitmap.createScaledBitmap(tgreenblock, carteTileWidth, carteTileHeight, true);
 
         //image pour la preview
         tredblockprev   = BitmapFactory.decodeResource(mRes, R.drawable.redblock);
@@ -255,12 +436,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         blueblockprev 	= Bitmap.createScaledBitmap(tblueblockprev, cartePrevTileWidth, cartePrevTileHeight, true);
         greenblockprev 	= Bitmap.createScaledBitmap(tgreenblockprev, cartePrevTileWidth, cartePrevTileHeight, true);
 
-        tmenui      = BitmapFactory.decodeResource(mRes, R.drawable.menui);
-        menui       = Bitmap.createScaledBitmap(tmenui, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
-        tmenuioff      = BitmapFactory.decodeResource(mRes, R.drawable.menuioff);
-        menuioff       = Bitmap.createScaledBitmap(tmenuioff, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
-        tmenum      = BitmapFactory.decodeResource(mRes, R.drawable.menum);
-        menum       = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
+        tmenui          = BitmapFactory.decodeResource(mRes, R.drawable.menui);
+        menui           = Bitmap.createScaledBitmap(tmenui, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenuioff       = BitmapFactory.decodeResource(mRes, R.drawable.menuioff);
+        menuioff        = Bitmap.createScaledBitmap(tmenuioff, cartePrevLeftAnchor/2, (int) (cartePrevTileHeight*1.5), true);
+        tmenum          = BitmapFactory.decodeResource(mRes, R.drawable.menum);
+        menum           = Bitmap.createScaledBitmap(tmenum, (int)screenX, (int)screenY, true);
 
         tbackground         = BitmapFactory.decodeResource(mRes, R.drawable.win);
         background          = Bitmap.createScaledBitmap(tbackground, (int)screenX, (int)screenY, true);
@@ -271,35 +452,38 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         implay              = Bitmap.createScaledBitmap(imtplay, iconWinWidth, iconWinHeight, true);
         implaypressed       = Bitmap.createScaledBitmap(imtplaypressed, iconWinWidth, iconWinHeight, true);
 
-        xmenui = cartePrevLeftAnchor/5;
-        ymenui = cartePrevTopAnchor;
+        xmenui      = cartePrevLeftAnchor/5;
+        ymenui      = cartePrevTopAnchor;
         xecartmenui = cartePrevLeftAnchor/2;
         yecartmenui = (int) (cartePrevTileHeight*1.5);
+
+        textSize    = (int) screenY/30;
+
+        xmovestext  = cartePrevLeftAnchor + carteWidth*cartePrevTileWidth + cartePrevLeftAnchor/5;
+        ymovestext  = cartePrevTopAnchor + textSize;
+        xtimertext  = cartePrevLeftAnchor + carteWidth*cartePrevTileWidth + cartePrevLeftAnchor/4;
+        ytimertext  = cartePrevTopAnchor + textSize*5;
 
         paint = new Paint();
         paint.setColor(0xff0000);
 
         paint.setDither(true);
-        paint.setColor(Color.BLACK);
+        paint.setColor(Color.YELLOW);
         paint.setTextAlign(Paint.Align.LEFT);
         paint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         paint.setTextSize(textSize);
 
-        carte           = new int[carteHeight][carteWidth];
-        carteprev       = new int[carteHeight][carteWidth];
-        leveldone       = new int[nblevel];
-
-        for (int i = 0; i < nblevel; i++) leveldone[i] = 0;
-
-        loadlevel(lvl);
 
         lock_rowy = false;
         lock_rowx = false;
         lock_row = false;
         lock_menu = false;
+        lock_retry = false;
+        lock_continue = false;
 
         if ((cv_thread!=null) && (!cv_thread.isAlive())) {
             cv_thread.start();
+            CDTimer.start();
             Log.e("-FCT-", "cv_thread.start()");
         }
     }
@@ -357,6 +541,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             canvas.drawBitmap(menui, xmenui, ymenui, alpha);
     }
 
+    private void painttimerandcoup(Canvas canvas, Paint alpha)
+    {
+        canvas.drawText("Moves", xmovestext, ymovestext, alpha);
+        canvas.drawText("" + nbCoup, xmovestext, ymovestext + 2*textSize, alpha);
+        canvas.drawText("Timer", xtimertext, ytimertext, alpha);
+        canvas.drawText("" + timer, xtimertext, ytimertext + 2*textSize, alpha);
+    }
+
     private void decaleCarte (int ind, int num)
     {
         int tmp, i, j;
@@ -399,6 +591,8 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                 carte[0][ind] = tmp;
                 break;
         }
+        mEventListener.soundHappening();
+        nbCoup++;
     }
 
     private boolean isWon()
@@ -415,11 +609,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             }
         }
         leveldone[lvl] = 1;
+        Log.e("Intelligent-workout","isWon done");
         return true;
     }
 
     public void transition_to_win (Canvas canvas)
     {
+        CDTimer.cancel();
+        Log.e("Intelligent-workout","Transition to win");
         if (outAlpha > 40)
         {
             paintcarte(canvas, alphaPaint);
@@ -436,13 +633,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
         else
         {
+            paint.setColor(Color.BLACK);
+
             //icone du menu change de place
             xecartmenui = iconWinWidth;
             yecartmenui = iconWinHeight;
             xmenui = cartePrevLeftAnchor + cartePrevLeftAnchor/2 + cartePrevLeftAnchor/5;
             ymenui = (int)screenY-carteTopAnchor-carteTopAnchor/5;
 
-            
             canvas.drawBitmap(background, 0, 0, null);
             canvas.drawText("Number of move : " + nbCoup, (int)screenX/2 - (int)screenX/4, (int)screenY/2 - textSize, paint);
             canvas.drawText("Times until end : " + timer, (int)screenX/2 - (int)screenX/4, (int)screenY/2 + textSize, paint);
@@ -450,6 +648,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             paintmenui(canvas, null);
             canvas.drawBitmap(implay, xplay, yplay, null);
         }
+        mEventListener.onLevelWon();
     }
 
     // dessin du jeu (fond uni, en fonction du jeu gagne ou pas dessin du plateau)
@@ -496,6 +695,7 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
             paintcarte(canvas, null);
             paintpreview(canvas, null);
             paintmenui(canvas, null);
+            painttimerandcoup(canvas, paint);
         }
     }
 
@@ -555,6 +755,12 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
     public interface IMyEventListener
     {
         public void onMenuPressed();
+        public void onRetryPressed();
+        public void onContinuePressed();
+        public void onLvlInstancePressed();
+        public void onLevelWon();
+        public void soundHappening();
+        public void getLevelDone();
     }
 
     public void setEventListener(IntelligentWorkout.IMyEventListener mEventListener)
@@ -576,6 +782,16 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                         && y > ymenui && y < ymenui + yecartmenui)
                 {
                     lock_menu = true;
+                }
+                else if(boolwin && (x > xretry && x < xretry + iconWinWidth
+                        && y > yretry && y < yretry + iconWinHeight))
+                {
+                    lock_retry = true;
+                }
+                else if(boolwin && (x > xplay && x < xplay + iconWinWidth
+                        && y > yplay && y < yplay + iconWinHeight))
+                {
+                    lock_continue = true;
                 }
                 // Touch on main board screen
                 else if (event.getY() > carteTopAnchor)
@@ -631,6 +847,14 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
                         lock_menu = false;
                         mEventListener.onMenuPressed();
                     }
+                    if(lock_retry)
+                    {
+                        mEventListener.onRetryPressed();
+                    }
+                    if(lock_continue)
+                    {
+                        mEventListener.onContinuePressed();
+                    }
                 }
                 lock_row = false;
                 lock_rowx = false;
@@ -640,5 +864,57 @@ public class IntelligentWorkout extends SurfaceView implements SurfaceHolder.Cal
         }
         return true;
     }
-    //((AppCompatActivity) getContext()).finish(); // end activity
-}
+
+    /*
+    sizex : Taille en x du tableau de niveau
+    sizey : Taille en y du tableau de niveau
+    number_of_levels : Nombre de niveau souhaité
+    percent_... : pourcentage d'apparition des couleurs dans les niveaux (entre 0 et 1)
+    */
+    public void generateLevels(int sizex, int sizey,
+                               float percent_blue,float percent_red,float percent_green) {
+        //Évite pour un pourcentage d'être plus grand que 100%
+        if ((percent_blue + percent_red + percent_green) != 1.0) {
+            Log.i("ERROR",
+                    "ERR_BLOCK_PERCENTAGE(Percentage must cumulate to be equal to 1");
+            exit(0);
+        }
+        //long seed = 1; // Seed pour l'aléatoire
+        Random rand_gen = new Random(/*seed*/); // Aléatoire servant pour la sélection d'une couleur
+        float whois; // Variable contenant ce dernier pourcentage
+
+        //Liste d'indice aléatoire pour Y (évite les doublons)
+        ArrayList<Integer> Rand_verticeY= new ArrayList<Integer>(sizey);
+        for(int number = 0 ; number < sizey ; number++)
+            Rand_verticeY.add(number);
+        //Liste d'indice aléatoire pour X (évite les doublons)
+        ArrayList<Integer> Rand_verticeX= new ArrayList<Integer>(sizex);
+        for(int number = 0 ; number < sizey ; number++)
+            Rand_verticeX.add(number);
+        //Tableau contenant les niveaux aléatoire
+        rand_ref = new int[sizey][sizex];
+        //Tableau contenant les preview des niveaux aléatoire
+        rand_ref_prev = new int[sizey][sizex];
+        Collections.shuffle(Rand_verticeX);//Mélange les X
+        Collections.shuffle(Rand_verticeY);//Mélange les Y
+            for (int line = 0; line < sizey; line++) {
+                for (int col = 0; col < sizex; col++) {
+                    whois = rand_gen.nextFloat(); //Test d'un pourcentage (entre 0 et 1)
+                    //Je suis bleu!
+                    if (whois <= percent_blue) {
+                        rand_ref[line][col] = CST_blueblock;
+                        rand_ref_prev[Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_blueblock;
+                        //Je suis rouge!
+                    } else if (whois > percent_blue && whois <= (percent_blue + percent_red)) {
+                        rand_ref[line][col] = CST_redblock;
+                        rand_ref_prev[Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_redblock;
+                        //Je suis vert!
+                    } else if (whois > (percent_blue + percent_red)) {
+                        rand_ref[line][col] = CST_greenblock;
+                        rand_ref_prev[Rand_verticeY.get(line)][Rand_verticeX.get(col)] = CST_greenblock;
+                    }
+                }
+            }
+        }
+    }
+

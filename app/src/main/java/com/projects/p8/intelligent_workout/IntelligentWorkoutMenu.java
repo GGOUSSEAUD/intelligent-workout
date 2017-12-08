@@ -59,7 +59,7 @@ public class IntelligentWorkoutMenu extends SurfaceView implements SurfaceHolder
     private Resources mRes;
     private Context mContext;
 
-    private boolean in = true;
+    public boolean in = true;
     private Thread cv_thread;
     SurfaceHolder holder;
 

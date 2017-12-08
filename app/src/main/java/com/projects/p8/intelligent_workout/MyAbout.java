@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-public class MyAbout extends Activity
+public class MyAbout extends MyTypeOfActivity
 {
     private IntelligentWorkoutAbout mIntelligentWorkoutAbout;
 
@@ -13,6 +13,7 @@ public class MyAbout extends Activity
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        this.level_music = "ure_welcome.mp3";
         setContentView(R.layout.mainabout);
 
         mIntelligentWorkoutAbout = findViewById(R.id.IntelligentWorkoutAbout);
